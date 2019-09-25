@@ -23,19 +23,32 @@
 *******************************************************************************/
 
 struct telemetry_point {
-	char[] location; /*the location of the substation*/
+	/*the location of the substation*/
+	char[] location; 
+	/*A unique code given to each piece of equipment*/
 	char[] desig;
+	/*the type of equipment, eg. Cb = circuit breaker*/
 	char[] plant;
+	/*eg. voltage level 11kV*/
 	char[] network;
+	/*The name of the actual point eg. oil temperature*/
 	char[] quantity;
+	/*Always DNP in this case, comms protocol that talks to master station*/
 	char[] protocol;
+	/*channel number of the module */
 	int number;
+	/*the module address for master station communications*/
 	int address;
+	/*what type of signal, eg. analog, digital etc*/
 	char[] moduletype;
+	/*has the telemetry failed at the time of CSV save*/
 	int failed;
+	/*Is the telemetry online when CSV saved*/
 	int online;
+	/*same as failed*/
 	int faulty;
-	int oos; /* Out of service */
+	/* Out of service */
+	int oos; 
 } typedef struct telemetry_point telemetry_point_t;
 
 /*******************************************************************************
@@ -47,24 +60,34 @@ struct telemetry_point {
 /* Would we have a function to print all the data entries? - Michael */
 
 /* Prints the start menu */
+/*Michael*/
 void start_menu(void);
 /* Prints the file menu */
+/*Michael*/
 void file_menu(void);
 /* Imports the data from csv and writes to database */
+/*Diego*/
 void import_data(void);
 /* Loads the data from csv */
+/*Diego*/
 void load_data(void);
 /* Prints the search menu */
+/*Michael*/
 void search_menu(void);
 /* Searches the csv by plant */
+/*Jacob*/
 void search_plant(void);
 /* Searches the csv by desig */
+/*Jacob*/
 void search_desig(void);
 /* Searches the csv by module */
+/*Jacob*/
 void search_module(void);
 /* Exports the data as a csv */
+/*Michael*/
 void export_csv(void);
 /* Exports the database file */
+/*Michael*/
 void save_data(void);
 
 /*******************************************************************************
