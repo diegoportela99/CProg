@@ -1,0 +1,4 @@
+18/09/2019 - Project started. Files created. Initial main and structs created.
+20/09/2019 - Function Prototypes created. Header files added. Comment blocks added.
+21/09/2019 - Main function implemented.
+25/09/2019 - Some minor changes to the top level file.
