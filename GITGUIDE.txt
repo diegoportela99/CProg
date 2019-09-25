@@ -1,0 +1,6 @@
+git pull origin master
+//edit your stuff
+git checkout -b branchname
+git add .
+git commit -m "your desc"
+git push origin branchname
