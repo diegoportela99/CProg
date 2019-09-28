@@ -18,29 +18,32 @@
  * Constants
 *******************************************************************************/
 
+/* Temporary length for strings, so the code can compile */
+#define MAX_STRING_LEN 256
+
 /*******************************************************************************
  * Structs
 *******************************************************************************/
 
 struct telemetry_point {
 	/*the location of the substation*/
-	char[] location; 
+	char location[MAX_STRING_LEN]; 
 	/*A unique code given to each piece of equipment*/
-	char[] desig;
+	char desig[MAX_STRING_LEN];
 	/*the type of equipment, eg. Cb = circuit breaker*/
-	char[] plant;
+	char plant[MAX_STRING_LEN];
 	/*eg. voltage level 11kV*/
-	char[] network;
+	char network[MAX_STRING_LEN];
 	/*The name of the actual point eg. oil temperature*/
-	char[] quantity;
+	char quantity[MAX_STRING_LEN];
 	/*Always DNP in this case, comms protocol that talks to master station*/
-	char[] protocol;
+	char protocol[MAX_STRING_LEN];
 	/*channel number of the module */
 	int number;
 	/*the module address for master station communications*/
 	int address;
 	/*what type of signal, eg. analog, digital etc*/
-	char[] moduletype;
+	char moduletype[MAX_STRING_LEN];
 	/*has the telemetry failed at the time of CSV save*/
 	int failed;
 	/*Is the telemetry online when CSV saved*/
@@ -49,7 +52,7 @@ struct telemetry_point {
 	int faulty;
 	/* Out of service */
 	int oos; 
-} typedef struct telemetry_point telemetry_point_t;
+}; typedef struct telemetry_point telemetry_point_t;
 
 /*******************************************************************************
  * Function Prototypes
@@ -62,9 +65,15 @@ struct telemetry_point {
 /* Prints the start menu */
 /*Michael*/
 void start_menu(void);
+/* Handles user input for start_menu */
+/*Michael*/
+int start_menu_handler(void);
 /* Prints the file menu */
 /*Michael*/
 void file_menu(void);
+/* Handles user input for file_menu */
+/*Michael*/
+int file_menu_handler(void);
 /* Imports the data from csv and writes to database */
 /*Diego*/
 void import_data(void);
@@ -74,6 +83,9 @@ void load_data(void);
 /* Prints the search menu */
 /*Michael*/
 void search_menu(void);
+/* Handles user input for search_menu */
+/*Michael*/
+int search_menu_handler(void);
 /* Searches the csv by plant */
 /*Jacob*/
 void search_plant(void);
@@ -93,103 +105,18 @@ void save_data(void);
 /*******************************************************************************
  * Main
 *******************************************************************************/
-int exit = 0; /* Flags exit state */
-int state[] = {0,0,0,0}; /* State of program 0) overall 
-                                             1) in start menu 
-                                             2) in file menu, and
-                                             3) in search menu */
-
-/* NOTE: This current outline ignores error handling. Any function called
-         from the switch cases which could possibly fail should return a 1 or 
-         0 for error handling.
-         Please use 1 for success - it just makes for more intuitive if 
-         phrasing. (Eg. if(!load_data()) {...} )
-         
-         Also, this current main-loop is very ugly. It is functionally how I
-         think the program will probably run, but I think we should really
-         break out all the menu switch cases (and their relative functions) 
-         into separate files. 
-         --Owen
-         UPDATE*/
-
 int main(void) { /* <- Coding standard here. UPDATE */
-	while(!exit){
-	    switch(state[0]) {
-	        
-	        /* Overall state 0: START MENU */
-	        case 0: 
-	            switch(state[1]) {
-	                /* Print start menu, get user input */
-	                case 0: state[1] = start_menu(); 
-	                        break;
-	                
-	                /* Load data from encrypted file */
-	                case 1: load_data(); 
-	                        state[0] = 1; /* Go to file menu */
-	                        break;
-	        
-	                /* Import data from CSV */
-		            case 2: import_data(); 
-		                    state[0] = 1; /* Go to file menu */
-		                    break;
-		    
-		            /* Use existing file in memory */
-		            case 3: state[0] = 1; 
-                            break;
-                    
-                    /* Exit the program */
-		            case 4: exit = 1; 
-		                    break;
-		    
-		            /* Invalid state reached */
-		            default: 
-		        }
-		        break;
-		    
-		    case 1: /* Overall state 1: FILE MENU */ 
-		        switch(state[2]) {
-		        
-		            /* Print file menu, get user input */
-		            case 0: state[2] = file_menu(); 
-		                    break;
-		                    
-		            /* Substate: SEARCH MENU */
-		            case 1:  
-		                switch(state[3]) {
-		                
-		                    /* Print search menu, get user input*/
-		                    case 0: state[3] = search_menu();
-		                            break;
-		                
-		                    /* Search by plant */
-		                    case 1: search_plants(); 
-		                            break;
-		                            
-                            /* Search by designation */
-                            case 2: search_desig(); 
-	                                break;
-		                    
-                            /* Search by module */
-                            case 3: search_module(); 
-                                    break;
-	                    }
-	                    break;
-		                    
-		            case 2: export_csv(); /* Export to CSV */
-		                    break;
-		            
-		            case 3: save_data(); /* Export to encrypted file */
-		                    break;
-		                    
-		            case 4: state[0] = 0; /* Exits to start menu */
-		            
-		            default: /* Invalid state reached  */
-		        }
-		        break;
-		        
-		    default: /* Invalid state reached */
-		}
+	int selection;
+	/* Do while loop loops infinitely as the exit condition is the user entering
+	a 4 which in the switch case calls the program to exit */
+	/* This is just an initial format for the menu, it may need to be changed
+	later if any issues are encountered */
+	do {
+		if (selection != 3)
+    	start_menu();
+		selection = start_menu_handler();
 	}
+	while (selection != 4);
 	return(0);
 }
 
@@ -199,31 +126,118 @@ int main(void) { /* <- Coding standard here. UPDATE */
 
 /*******************************************************************************
  * This functions prints the start menu
- * Developer:
+ * Developer: Michael Lardner
  * inputs:
  * - none
  * outputs:
  * - none
 *******************************************************************************/
 void start_menu(void) {
+	printf("\n"
+    "1. Import CSV data\n"
+    "2. Load database file\n"
+    "3. File submenu\n"
+    "4. Exit program\n"
+    "Enter choice (number between 1-4)>\n");
+}
+
+/*******************************************************************************
+ * This functions handles user input for the start menu
+ * Developer: Michael Lardner 12893602
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+int start_menu_handler(void) {
+	int selection;
+	/* Using scanf right now for convinience, will change for consistency */
+	scanf("%d", &selection); 
+	switch(selection) {
+		case 1 :
+			import_data();
+			break;
+		case 2 :
+			load_data();
+			break;
+		case 3 :
+			do {
+				file_menu();
+				selection = file_menu_handler();
+			}
+			while (selection != 4);
+			/* Change selection to 0 so that when selection is returned it does
+			not trigger the while clause in the main. Enabling the loop to 
+			continue. */
+			selection = 0;
+			break;	
+		case 4 :
+			exit(0);
+			break;
+		default :
+			printf("Invalid choice\n");
+			break;
+	}
+	return selection;
 
 }
 
 /*******************************************************************************
  * This functions prints the file menu
- * Developer: 
+ * Developer: Michael Lardner 12893602
  * inputs:
  * - none
  * outputs:
  * - none
 *******************************************************************************/
 void file_menu(void) {
+	printf("\n"
+    "1. Search data\n"
+    "2. Export CSV\n"
+    "3. Export database file\n"
+    "4. Exit to start menu\n"
+    "Enter choice (number between 1-4)>\n");
+}
 
+/*******************************************************************************
+ * This functions handles user input for the file menu
+ * Developer: Michael Lardner 12893602
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+int file_menu_handler(void) {
+	int selection;
+	/* Using scanf right now for convinience, will change for consistency */
+	scanf("%d", &selection); 
+	switch(selection) {
+		case 1 :
+			do {
+				search_menu();
+				selection = search_menu_handler();
+			}
+			while (selection != 4);
+			selection = 0;
+			break;
+		case 2 :
+			export_csv();
+			break;
+		case 3 :
+			save_data();
+			break;	
+		case 4 :			
+			break;
+		default :
+			printf("Invalid choice\n");
+			break;
+	}
+	return selection;
 }
 
 /*******************************************************************************
  * This functions imports the data from a csv file of the users selection 
- * Developer: 
+ * Developer: Michael Lardner 12893602
  * inputs:
  * - none
  * outputs:
@@ -254,6 +268,43 @@ void load_data(void) {
  * - none
 *******************************************************************************/
 void search_menu(void) {
+	printf("\n"
+    "1. Search by plant\n"
+    "2. Search by desig\n"
+    "3. Search by module\n"
+    "4. Return to file menu\n"
+    "Enter choice (number between 1-4)>\n");
+}
+
+/*******************************************************************************
+ * This functions handles user input for the search menu
+ * Developer: Michael Lardner 12893602
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+int search_menu_handler(void) {
+	int selection;
+	/* Using scanf right now for convinience, will change for consistency */
+	scanf("%d", &selection); 
+	switch(selection) {
+		case 1 :
+			search_plant();
+			break;
+		case 2 :
+			search_desig();
+			break;
+		case 3 :
+			search_module();
+			break;	
+		case 4 :			
+			break;
+		default :
+			printf("Invalid choice\n");
+			break;
+	}
+	return selection;
 
 }
 
