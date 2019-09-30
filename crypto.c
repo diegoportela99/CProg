@@ -22,26 +22,72 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* This adds debug features */
 #define DEBUG
+
+/* This adds extra debug features 
+#define DETAILEDDEBUG */
 
 /* Database name */
 #define DBNAME "database"
 
-/* Defines a modulus which behaves correctly for negative values, unlike  "%" 
-   Mathematically, negative inputs to mod should wrap round to positive. */
-#define MOD(a,b) ((((a)%(b))+(b))%(b)) 
+/* Key file name*/
+#define KEYNAME "key"
+
+/* Source random numbers */
+#define URANDOM "/dev/urandom"
+
+/* Defines a modulus which behaves correctly for negative values (unlike  "%").
+   Mathematically, negative inputs to mod should wrap round to positive. 
+   NOTE: Does not work for x < -y. */
+#define MOD(x,y) ((((x)%(y))+(y))%(y)) 
 
 /* Selects the rightmost 8 bytes of a 16 byte int */
-#define EIGHTLOWMASK 0xFFFFFFFF 
+#define EIGHTLOWMASK 0xFFFFFFFF
+
+/* The number of blocks of key material. */
+#define NUMBER_OF_KEY_BLOCKS 4
+
+/* The number of sections of key used for key whitening */
+#define NUMBER_OF_WKEYS 4
+
+/* The number of sections of key used in the F function */
+#define NUMBER_OF_KEYS 32
+
+/* The number of cycles of Wolfram's Rule 30 applied in the F function. Could
+   be as low as 1, but higher numbers cause greater non-linearity. */
+#define WOLFRAMCYCLES 3
+
+/* This string is printed to set terminal text to default */
+#define TEXTDEFAULT "\033[0m"
+
+/* This string is printed to set terminal text to red. x is a boolean: 1 means 
+   bold, 0 means normal. */
+#define TEXTRED(x) "\033["#x";31m"
+
+/* This string is printed to set terminal text to blue. x is a boolean: 1 means 
+   bold, 0 means normal. */
+#define TEXTBLUE(x) "\033["#x";34m"
+
+/* Used to pad titles in debug mode */
+#define TITLE "===================="
 
 /*******************************************************************************
  * Structure Definitions
 *******************************************************************************/
+
+/* This structure holds a 'cycle' of keys - all the keys needed to encrypt a
+   single block of ciphertext. In addition, it holds a pointer to the previous
+   key cycle - needed in decryption to iterate backwards through key cycles, but
+   also needed for deallocation of memory. */
 struct key_cycle {
-    unsigned long long wkey[4]; /* The sections of key used for key whitening */
-    unsigned long long key[32]; /* The sections of key used in the F function */
+    /* The sections of key used for key whitening */
+    unsigned long long wkey[NUMBER_OF_WKEYS]; 
+
+    /* The sections of key used in the F function */
+    unsigned long long key[NUMBER_OF_KEYS]; 
     
-    /* Links to previous key cycle. Needed to iterate backwards through key
+    /* Pointer to previous key cycle. Needed to iterate backwards through key
        cycles for decryption */
     struct key_cycle* previous_key_cycle_p; 
 };
@@ -51,40 +97,57 @@ typedef struct key_cycle key_cycle_t;
  * Function Prototypes
 *******************************************************************************/
 /* Initializes the first key cycle */
-key_cycle_t* init_key_cycle(unsigned long long key[4]);
+key_cycle_t* init_key_cycle(unsigned long long key[NUMBER_OF_KEY_BLOCKS]);
 
 /* Schedules a new key cycle given the previous one */
 key_cycle_t* key_schedule(key_cycle_t* previous_key_cycle_p);
 
+/* Frees a key cycle and all previous key cycles */
+void free_key_cycles(key_cycle_t* key_cycle_p);
+
 /* Encrypts 64 bit blocks of plaintext, given an array of plaintext blocks,
-    the number of blocks of plaintext, and a key.
-    Writes ciphertext to file. */
-int encrypt(unsigned long long plaintext[], 
-    int number_of_blocks, unsigned long long key[4]);
+   the number of blocks of plaintext, and a key. Writes ciphertext to file. */
+int encrypt(unsigned long long plaintext[], int number_of_blocks);
 
-int decrypt(unsigned long long* plaintext_p,
-    unsigned long long key[4]);
+/* Decrypts a file into 64 bit blocks of plaintext, given a key. */
+int decrypt(unsigned long long* plaintext_p);
 
+/* Saves the encrypted text to a file, with an integer header which is the
+   number of blocks of ciphertext saved. */
 int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks);
 
+/* Reads the header of an encrypted file, and gets the number of ciphertext
+   blocks in the file */
 int read_header();
 
+/* Loads an encrypted file into memory */
 unsigned long long* load_ciphertext(int number_of_blocks);
 
+/* The core encryption scheme is a feistel network. It takes a block and key 
+   material, and either encryts or decrypts the block */
 unsigned long long feistel_network(unsigned long long plaintext,key_cycle_t key,
     int encrypt);
 
+/* Also known as a "round function", the heart of a feistel cipher. Takes a 
+   block of plaintext, performs pseudo-random number generation with
+   it as the seed, and then XORs in the key. Is strongly non-linear. */
 unsigned long f_function(unsigned long plaintext, unsigned long key);
+
+/* Performs the pseudo-random number generation used in the F-function. */
+unsigned long wolframs_rule_30(unsigned long plaintext);
+
+/* Cryptographically Secure Pseudo-Random Number Generator. Generates a key 
+   from system randomness provided in /dev/urandom. Is Linux system dependent.*/
+unsigned long long csprng();
+
+/* Saves the key to a file, or loads it from one. */
+int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save);
+
 
 /*******************************************************************************
  * Main
 *******************************************************************************/
 int main(void) {
-    unsigned long long key[4] = {0xfe1443539c74d13c,
-                                 0x8dedd14a0de5c057,
-                                 0x9cad51f195a8bebf,
-                                 0x24e210ec42c7d2f3};
-
     unsigned long long plaintext[4] = {0x2d1cd84c6567854c, 
                                        0x3853166d394825d4,
                                        0xc325242519821d33,
@@ -92,27 +155,42 @@ int main(void) {
     
     unsigned long long decrypted[4] = {0,0,0,0};
 
-    encrypt(plaintext,4,key);
-    decrypt(decrypted,key);
-    printf("Plaintext:\n%llx\n%llx\n%llx\n%llx\n",
+    encrypt(plaintext,4);
+    decrypt(decrypted);
+    printf(TEXTBLUE(1));
+    printf("\n"TITLE"FINAL PLAINTEXT"TITLE);
+    printf(TEXTDEFAULT);
+    printf("\n%llx\n%llx\n%llx\n%llx\n",
         decrypted[0],decrypted[1],decrypted[2],decrypted[3]);
 
     return(0);
 }
-/*******************************************************************************
- * Key to Key Cycle - Generate a key cycle from a key
+/******************************************************************************* 
+ * This function creates a new key cycle struct from 256 bits of key material.
+ * This should only be used to create the very first key cycle, from then on use
+ * key_schedule().
+ * inputs:
+ * - key[] | The array of key material used to initialize the key cycle
+ * outputs:
+ * - key_cycle_p | A pointer to the initialized key_cycle_p. 
+ * /////////////////////////// MEMORY WARNING //////////////////////////////////
+ * This function calls malloc, and returns a pointer to the allocated memory! 
+ * Functions which use init_key_cycle() are responsible for calling the
+ * destructor free_key_cycles() on the LAST key cycle created.
 *******************************************************************************/
 key_cycle_t* init_key_cycle(unsigned long long key[]) {
         int i;
-        key_cycle_t* key_cycle = (key_cycle_t*)malloc(sizeof(key_cycle_t));
-        if(key_cycle == NULL) {printf("AAHH NULL POINTER DEBUG");}
+        key_cycle_t* key_cycle_p = (key_cycle_t*)malloc(sizeof(key_cycle_t));
+        if(key_cycle_p == NULL) {printf("AAHH NULL POINTER DEBUG");}
         
 
         #ifdef DEBUG
+            printf(TEXTRED(0));
             printf("Initializing key cycle\n");
+            printf(TEXTDEFAULT);
         #endif
 
-        (*key_cycle).previous_key_cycle_p = NULL;
+        (*key_cycle_p).previous_key_cycle_p = NULL;
 
         unsigned long temp[4] = {f_function(key[0]>>32,key[1]&EIGHTLOWMASK),
                                  f_function(key[1]>>32,key[2]&EIGHTLOWMASK),
@@ -124,10 +202,10 @@ key_cycle_t* init_key_cycle(unsigned long long key[]) {
             temp[1] = f_function(temp[3],temp[2]);
             temp[2] = f_function(temp[0],temp[3]);
             temp[3] = f_function(temp[1],temp[0]);
-            (*key_cycle).wkey[i] = f_function(temp[0],temp[1]);
+            (*key_cycle_p).wkey[i] = f_function(temp[0],temp[1]);
             
             #ifdef DETAILEDDEBUG
-                printf("WKey %d: %llx ", i, (*key_cycle).wkey[i]);
+                printf("WKey %d: %llx ", i, (*key_cycle_p).wkey[i]);
             #endif
         }
         
@@ -136,19 +214,28 @@ key_cycle_t* init_key_cycle(unsigned long long key[]) {
             temp[1] = f_function(temp[3],temp[2]);
             temp[2] = f_function(temp[0],temp[3]);
             temp[3] = f_function(temp[1],temp[0]);
-            (*key_cycle).key[i] = f_function(temp[0],temp[1]);
+            (*key_cycle_p).key[i] = f_function(temp[0],temp[1]);
             #ifdef DETAILEDDEBUG
-                printf("Key %d: %llx ", i, (*key_cycle).key[i]);
+                printf("Key %d: %llx ", i, (*key_cycle_p).key[i]);
             #endif
         }
         #ifdef DETAILEDDEBUG
             printf("\n");
         #endif
-    return key_cycle;
+    return key_cycle_p;
 }
 
-/*******************************************************************************
- * Key Schedule
+/******************************************************************************* 
+ * This function creates a new key cycle struct from an earlier key cycle. The 
+ * new key cycle contains a pointer to the old one.
+ * inputs:
+ * - previous_key_cycle_p | A pointer to the previous key cycle
+ * outputs:
+ * - key_cycle_p | A pointer to the new key cycle 
+ * /////////////////////////// MEMORY WARNING //////////////////////////////////
+ * This function calls malloc, and returns a pointer to the allocated memory! 
+ * Functions which use init_key_cycle() are responsible for calling the 
+ * destructor free_key_cycles() on the LAST key cycle created.
 *******************************************************************************/
 key_cycle_t* key_schedule(key_cycle_t* previous_key_cycle_p) {
     
@@ -159,34 +246,95 @@ key_cycle_t* key_schedule(key_cycle_t* previous_key_cycle_p) {
     (*key_cycle_p).previous_key_cycle_p = previous_key_cycle_p;
 
     for(i=0; i<4; i++) {
-        (*key_cycle_p).wkey[i]= f_function((*previous_key_cycle_p).wkey[MOD(i+1,4)],
-                                         (*previous_key_cycle_p).wkey[i]);
+        (*key_cycle_p).wkey[i]= f_function(
+            (*previous_key_cycle_p).wkey[MOD(i+1,4)],
+            (*previous_key_cycle_p).wkey[i]);
     }
     for(i=0; i<32; i++) {
-        (*key_cycle_p).key[i]= f_function((*previous_key_cycle_p).key[MOD(i+7,32)],
-                                        (*previous_key_cycle_p).key[MOD(i-5,32)]);
+        (*key_cycle_p).key[i]= f_function(
+            (*previous_key_cycle_p).key[MOD(i+7,32)],
+            (*previous_key_cycle_p).key[MOD(i-5,32)]);
     }
     return(key_cycle_p);
 }
-/*******************************************************************************
- * Encrypt
-*******************************************************************************/
-int encrypt(unsigned long long plaintext[], 
-    int number_of_blocks, unsigned long long key[4]) {
-    int i; /* iterator */
 
-    key_cycle_t* key_cycle_p = init_key_cycle(key);
+void free_key_cycles(key_cycle_t* key_cycle_p) {
+    
+    /* Used to keep us from losing the pointer to the previous key cycle when
+       freeing a key cycle */ 
     key_cycle_t* previous_key_cycle_p;
+    
+    #ifdef DEBUG
+        int free_n = 0;
+        printf(TEXTRED(0));
+        printf("Freeing key cycles\n");
+        printf(TEXTDEFAULT);
+    #endif
 
+    /* Frees the key_cycles created for encryption */
+    while(key_cycle_p != NULL) {
+        #ifdef DEBUG
+            free_n++;
+            printf("%d: %p\n",free_n,key_cycle_p);
+        #endif
+        previous_key_cycle_p = (*key_cycle_p).previous_key_cycle_p;
+        free(key_cycle_p);
+        key_cycle_p = previous_key_cycle_p;
+    }
+}
+
+/*******************************************************************************
+ * This function encrypts an array of blocks of plaintext, and saves the
+ * resulting ciphertext to a file. This file has an integer header containing
+ * the number of 64 bit blocks in the file.
+ * inputs:
+ * - plaintext[] | An array of plaintext to be encrypted.
+ * - number_of_blocks | The number of blocks of plaintext, i.e., number of 
+ *                    | elements in the plaintext array
+ * - key[] | An array of key material used to encrypt the plaintext.
+ * outputs:
+ * - 1 or 0 | Has encrytion succeeded ? 1 : 0
+*******************************************************************************/
+int encrypt(unsigned long long plaintext[], int number_of_blocks) {
+    
+    #ifdef DEBUG
+        printf(TEXTRED(1));
+        printf("\n"TITLE"ENCRYTPING"TITLE"\n");
+        printf(TEXTDEFAULT);
+    #endif
+
+    int i; /* iterator */
+    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
+    
+    for(i=0;i<NUMBER_OF_KEY_BLOCKS;i++) {
+        key[i] = csprng();
+    }
+
+    /* Save the key to file */
+    file_handle_key(key,1);
+
+    /* Initiate the key_cycle, storing the pointer to it */
+    key_cycle_t* key_cycle_p = init_key_cycle(key);
+
+    /* ciphertext_p is a pointer to memory to contain the ciphertext.
+       MALLOC! Associated free() is later in encrypt */
     unsigned long long* ciphertext_p  = (unsigned long long*)malloc(sizeof
         (unsigned long long)*number_of_blocks);
-    if(ciphertext_p == NULL) {printf("AAHH NULL POINTER DEBUG");}
     
-    /* Generate key cycles for each block, and then encrypt them. */
+    /* Check if malloc succeeded */
+    if(ciphertext_p == NULL) {
+        printf("Malloc failed for ciphertext_p\n");
+        return(0);
+    }
+
+    /* Generate key cycles for each block of plaintext, and then encrypt them.*/
     for(i=0; i<number_of_blocks;i++) {
         key_cycle_p = key_schedule(key_cycle_p);
         #ifdef DETAILEDDEBUG
-            printf("Scheduled key %d, key_cycle_p = %p\n",i,key_cycle_p);
+            printf(TEXTRED(0));
+            printf("Scheduling key %d:\n",i);
+            printf(TEXTDEFAULT);
+            printf("key_cycle_p = %p\n",key_cycle_p);
         #endif
         (*(ciphertext_p+i)) = feistel_network(plaintext[i],*key_cycle_p,1);
         
@@ -196,28 +344,30 @@ int encrypt(unsigned long long plaintext[],
     free(ciphertext_p);
     ciphertext_p = NULL;
 
-    #ifdef DEBUG
-        int free_n = 0;
-    #endif
+    free_key_cycles(key_cycle_p);
 
-    while(key_cycle_p != NULL) {
-        #ifdef DEBUG
-        free_n++;
-            printf("Freeing key %d: %p\n",free_n,key_cycle_p);
-        #endif
-        previous_key_cycle_p = (*key_cycle_p).previous_key_cycle_p;
-        free(key_cycle_p);
-        key_cycle_p = previous_key_cycle_p;
-    }
     return(1);
 }
 
 /*******************************************************************************
  * Decrypt
 *******************************************************************************/
-int decrypt(unsigned long long* plaintext_p,
-    unsigned long long key[4]) {
+int decrypt(unsigned long long* plaintext_p) {
     
+    #ifdef DEBUG
+        printf(TEXTBLUE(1));
+        printf("\n"TITLE"DECRYTPING"TITLE"\n");
+        printf(TEXTDEFAULT);
+    #endif
+
+    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
+
+    file_handle_key(key,0);
+
+    /* We need to hang onto the last generated key_cycle_p so we can hand it
+    to free_key_cycles */
+    key_cycle_t* last_key_cycle_p;
+
     int cipherBlocks,i;
     unsigned long long* ciphertext_p = NULL;
     if(plaintext_p == NULL) {
@@ -231,33 +381,40 @@ int decrypt(unsigned long long* plaintext_p,
     }
 
     ciphertext_p = load_ciphertext(cipherBlocks);
-
-    #ifdef DEBUG
-        for(i=0;i<cipherBlocks;i++) {
-           printf("%llx\n",*(ciphertext_p+i));
-        }
-    #endif
     
-    printf("CipherBlocks: %d\n", cipherBlocks);
     key_cycle_t* key_cycle_p = init_key_cycle(key);
     
     for(i=0;i<cipherBlocks; i++) {
-        printf("Scheduling key %d\n", i);
         key_cycle_p = key_schedule(key_cycle_p);
-        
+                #ifdef DETAILEDDEBUG
+            printf(TEXTRED(0));
+            printf("Scheduling key %d:\n",i);
+            printf(TEXTDEFAULT);
+            printf("key_cycle_p = %p\n",key_cycle_p);
+        #endif
     }
 
+    last_key_cycle_p = key_cycle_p;
+
     for(i=cipherBlocks-1;i>=0;i--) {
-        (*(plaintext_p+i)) = feistel_network(
+        *(plaintext_p+i) = feistel_network(
             *(ciphertext_p+i),*key_cycle_p,0);  
         key_cycle_p = (*key_cycle_p).previous_key_cycle_p;
-        printf("Decrypting block %d\n",i);
     }
+
+    #ifdef DEBUG
+        printf(TEXTRED(0));
+        printf("Returning plaintext:\n");
+        printf(TEXTDEFAULT);
+        for(i=0;i<cipherBlocks;i++) {
+            printf("%llx\n",*(plaintext_p+i));
+        }
+    #endif
 
     free(ciphertext_p);
     ciphertext_p = NULL;
-    free(key_cycle_p);
-    key_cycle_p = NULL;
+
+    free_key_cycles(last_key_cycle_p);
     
     return(1);
 }
@@ -276,7 +433,9 @@ int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks) {
     }
 
     #ifdef DEBUG
+        printf(TEXTRED(0));
         printf("Saving ciphertext:\n");
+        printf(TEXTDEFAULT);
     #endif
 
     /* Add a header that is the number of 64 bit blocks in the encrypted file.
@@ -306,7 +465,7 @@ int read_header() {
         return(0);
     }
     fread(&header_val,sizeof(int),1,fp);
-    #ifdef DEBUG
+    #ifdef DETAILEDDEBUG
         printf("Header value: %d\n", header_val);
     #endif
     fclose(fp);
@@ -320,6 +479,13 @@ int read_header() {
 unsigned long long* load_ciphertext(int number_of_blocks) {
     int i;
     unsigned long long buffer;
+
+    #ifdef DEBUG
+        printf(TEXTRED(0));
+        printf("Loading ciphertext:\n");
+        printf(TEXTDEFAULT);
+    #endif
+
     FILE* fp = fopen(DBNAME, "rb");
     /* Check we succeed in opening the file */
     if(fp == NULL) {
@@ -336,13 +502,11 @@ unsigned long long* load_ciphertext(int number_of_blocks) {
     for(i = 0; i<number_of_blocks;i++) {
         fread(&buffer,sizeof(buffer),1,fp);
         *(ciphertext_p+i) = buffer;
-        #ifdef DETAILEDDEBUG
+        #ifdef DEBUG
             printf("%llx\n",buffer);
         #endif
     }
     
-    /* Note: we have to account for the increment of i where the condition in
-    the for loop is false */
     return(ciphertext_p);
 }
 /*******************************************************************************
@@ -355,10 +519,15 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
     unsigned long r_bits = plaintext & EIGHTLOWMASK;
     int i; /* iterator */
 
-
     #ifdef DEBUG
+        #ifdef DETAILEDDEBUG
+            printf(TEXTRED(0));
+        #endif
         printf("Feistel network running, mode is: %s\n", encrypt ? 
             "ENCRYPT":"DECRYPT");
+        #ifdef DETAILEDDEBUG
+            printf(TEXTDEFAULT);
+        #endif
     #endif
 
 
@@ -369,15 +538,15 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
         for(i = 0; i<32; i++) {
             
             #ifdef DETAILEDDEBUG
-                printf("Round %d: ",i+1);
-                printf("in: %8lx %8lx ", l_bits, r_bits);
+                printf("Round %d:\n",i+1);
+                printf("in:  %8lx %8lx\n", l_bits, r_bits);
             #endif
             
             r_bits = f_function(l_bits,keys.key[encrypt ? i : 31-i])^r_bits;
             /* Swap l_bits and r_bits */
             
             #ifdef DETAILEDDEBUG
-                printf("key: %llx out: %8lx %8lx\n", keys.key[encrypt ? i : 31-i], l_bits, r_bits);
+                printf("out: %8lx %8lx\n", l_bits, r_bits);
             #endif
             
             s_bits = l_bits;
@@ -395,17 +564,98 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
  * F Function
 *******************************************************************************/
 unsigned long f_function(unsigned long plaintext, unsigned long key) {
-    
-    unsigned long cryptotext = 0;
+    /* XOR key material with the plaintext. Doing this before applying Wolfram's
+       Rule 30 increases the key 'diffusion' - the number of bits of ciphertext
+       affected by the change of one bit of key. According to Shannon's 
+       principles of cryptography, this is a key goal of strong ciphers.*/
+    unsigned long cryptotext = plaintext^key;
     int i;
 
+    /* Applies Wolfram's Rule 30 to the ciphertext. Increasing the number of 
+       iterations here makes the F function less linear, increasing resistance 
+       to differential cryptanalysis. It also increases diffusion, in accordance
+       with Shannon's principles of cryptography. */
+
+    for(i=0;i<WOLFRAMCYCLES;i++) {
+        cryptotext = wolframs_rule_30(cryptotext);
+    }
+
+    return(cryptotext);
+}
+
+/*******************************************************************************
+ * Wolfram's Rule 30
+*******************************************************************************/
+unsigned long wolframs_rule_30(unsigned long plaintext) {
+
+    unsigned long ciphertext = 0;
+    int i;
     for(i=0;i<32;i++) {
         /* This impliments Wolfram's Rule 30: 0001 1110*/
         unsigned int bits[3] = {(plaintext >> MOD(i-1,32))&1,
                                 (plaintext >> (i))&1,
                                 (plaintext >> MOD(i+1,32))&1};
             
-            cryptotext = (cryptotext << 1) | (bits[0]^(bits[1]|bits[2]));
+            ciphertext = (ciphertext << 1) | (bits[0]^(bits[1]|bits[2]));
     }
-    return(cryptotext^key);
+    return(ciphertext);
+}
+
+/*******************************************************************************
+ * Cryptographically Secure Pseudo-Random Number Generator
+*******************************************************************************/
+unsigned long long csprng() {
+    unsigned long long random; /* Storage for the pseudorandom number */
+    #ifdef DEBUG
+        #ifdef DEBUG
+        printf(TEXTRED(0));
+        printf("Generating key...\n");
+        printf(TEXTDEFAULT);
+    #endif
+    #endif
+    FILE* fp = fopen(URANDOM,"rb");
+    /* Check we succeed in opening the file */
+    if(fp == NULL) { 
+        return(0);
+    }
+    fread(&random, sizeof(unsigned long long), 1, fp);
+    fclose(fp);
+    return(random);
+};
+
+
+/*******************************************************************************
+ * Saves key to a file
+*******************************************************************************/
+int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
+    int i; /* Iterators */
+    unsigned long long keyArray[4] = {key[0],key[1],key[2],key[3]};
+    FILE* fp = fopen(KEYNAME, save ? "wb":"rb");
+    /* Check we succeed in opening the file */
+    if(fp == NULL) { 
+        return(0);
+    }
+
+    if(!save) {
+        fread(keyArray,sizeof(unsigned long long),4,fp);
+    }
+
+    #ifdef DEBUG
+        printf(TEXTRED(0));
+        printf(save?"Saving keys:\n":"Loading keys:\n");
+        printf(TEXTDEFAULT);
+    #endif
+
+    for(i=0;i<NUMBER_OF_KEY_BLOCKS; i++) {
+        /*keyArray[i] = key_muddle(keyArray[i]);*/
+        #ifdef DEBUG
+            printf("%d: %llx\n",i+1,keyArray[i]);
+        #endif
+    }
+    if(save) {
+        fwrite(keyArray,sizeof(unsigned long long),4,fp);
+    }
+    fclose(fp);
+
+    return(1);
 }
