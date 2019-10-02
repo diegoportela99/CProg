@@ -10,6 +10,7 @@
 
 #include "Substation.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 /*******************************************************************************
  * This functions prints the start menu
@@ -45,10 +46,10 @@ int start_menu_handler(void) {
 	scanf("%d", &selection); 
 	switch(selection) {
 		case 1 :
-			import_data();
+			
 			break;
 		case 2 :
-			load_data();
+			
 			break;
 		case 3 :
 			do {
@@ -114,10 +115,10 @@ int file_menu_handler(void) {
 			selection = 0;
 			break;
 		case 2 :
-			export_csv();
+			
 			break;
 		case 3 :
-			save_data();
+			
 			break;	
 		case 4 :			
 			break;
@@ -162,13 +163,13 @@ int search_menu_handler(void) {
 	scanf("%d", &selection); 
 	switch(selection) {
 		case 1 :
-			search_plant();
+			
 			break;
 		case 2 :
-			search_desig();
+			
 			break;
 		case 3 :
-			search_module();
+			
 			break;	
 		case 4 :			
 			break;
