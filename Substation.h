@@ -8,38 +8,44 @@
 *******************************************************************************/
 
 /*******************************************************************************
- * Header Files
- * 
- * I think we can remove these - Ray **UPDATE**
-*******************************************************************************/
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/*******************************************************************************
  * Constants
 *******************************************************************************/
+
+/* Maximum length for strings */
+#define MAX_STRING_LEN 256
 
 /*******************************************************************************
  * Structs
 *******************************************************************************/
 
 struct telemetry_point {
-	char[] location; /*the location of the substation*/
-	char[] desig;
-	char[] plant;
-	char[] network;
-	char[] quantity;
-	char[] protocol;
+	/*the location of the substation*/
+	char location[MAX_STRING_LEN]; 
+	/*A unique code given to each piece of equipment*/
+	char desig[MAX_STRING_LEN];
+	/*the type of equipment, eg. Cb = circuit breaker*/
+	char plant[MAX_STRING_LEN];
+	/*eg. voltage level 11kV*/
+	char network[MAX_STRING_LEN];
+	/*The name of the actual point eg. oil temperature*/
+	char quantity[MAX_STRING_LEN];
+	/*Always DNP in this case, comms protocol that talks to master station*/
+	char protocol[MAX_STRING_LEN];
+	/*channel number of the module */
 	int number;
+	/*the module address for master station communications*/
 	int address;
-	char[] moduletype;
+	/*what type of signal, eg. analog, digital etc*/
+	char moduletype[MAX_STRING_LEN];
+	/*has the telemetry failed at the time of CSV save*/
 	int failed;
+	/*Is the telemetry online when CSV saved*/
 	int online;
+	/*same as failed*/
 	int faulty;
-	int oos; /* Out of service */
-} typedef struct telemetry_point telemetry_point_t;
+	/* Out of service */
+	int oos; 
+}; typedef struct telemetry_point telemetry_point_t;
 
 /*******************************************************************************
  * Function Prototypes
@@ -51,14 +57,20 @@ struct telemetry_point {
 
 /* Prints the start menu */
 void start_menu(void);
+/* Handles user input for start_menu */
+int start_menu_handler(void);
 /* Prints the file menu */
 void file_menu(void);
+/* Handles user input for file_menu */
+int file_menu_handler(void);
 /* Imports the data from csv and writes to database */
 void import_data(void);
 /* Loads the data from csv */
 void load_data(void);
 /* Prints the search menu */
-void search_data(void);
+void search_menu(void);
+/* Handles user input for search_menu */
+int search_menu_handler(void);
 /* Searches the csv by plant */
 void search_plant(void);
 /* Searches the csv by desig */
