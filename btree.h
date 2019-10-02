@@ -50,6 +50,30 @@ struct btree {
     telemetry_point_t* data_p;
 }; typedef struct btree btree_t;
 
+/*FUNCTION PROTOTYPES*/
+
+/* Creates a binary tree. Always use this function to create the top level node,
+and set it's parent to NULL */
+btree_t* create_b_tree(btree_t* parent);
+
+/* A tool for creating telemetry points. It handles memory allocation. */
+telemetry_point_t* create_telemetry_point(
+	char* loc,char* des,char* pla,char* net,char* qua,char* pro,int num,int add,
+    char* mod,int fai,int onl,int fau,int oos);
+
+/* Gets a telemetry point from a given root, by its index. */
+telemetry_point_t* get_telemetry_point(unsigned int index, btree_t* root);
+
+/* Adds a given telemetry point to the appropriate node. Also adds any other
+points needed to get to that node. */
+void add_telemetry_point(unsigned int index, btree_t* root, 
+    telemetry_point_t* telemetry_point_p);
+
+/* Deletes the datastructure. Call when done with the datastructure in memory.*/
+void delete_datastructure(btree_t* root);
+
+/* FUNCTION DEFINITIONS */
+
 btree_t* create_b_tree(btree_t* parent){
     btree_t* new_b_tree = (btree_t*)malloc(sizeof(btree_t));
     (*new_b_tree).l = NULL;
@@ -135,6 +159,9 @@ void delete_datastructure(btree_t* root) {
             #ifdef DEBUG
                 printf("Deleting node\n");
             #endif
+            if((*current_node_p).data_p) {
+                free((*current_node_p).data_p);
+            }
             if(current_node_p == root) {
                 #ifdef DEBUG
                     printf("Freeing root, all branches handled.\n");
