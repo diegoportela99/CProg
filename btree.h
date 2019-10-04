@@ -95,9 +95,10 @@ void delete_datastructure(btree_t* root);
 /* FUNCTION DEFINITIONS */
 
 root_t* create_root() {
-    root_t* new_root = (root_t*)malloc(sizeof(root_t));
-    (*new_root).root = create_b_tree(NULL);
-    (*new_root).number_of_entries = 0; 
+    root_t* new_root_p = (root_t*)malloc(sizeof(root_t));
+    (*new_root_p).root = create_b_tree(NULL);
+    (*new_root_p).number_of_entries = 0;
+    return(new_root_p);
 }
 
 btree_t* create_b_tree(btree_t* parent){
