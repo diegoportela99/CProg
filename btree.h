@@ -14,6 +14,9 @@
  * just an array that works faster.
 *******************************************************************************/
 
+#ifndef DATASTRUCTUREHEADER
+#define DATASTRUCTUREHEADER
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -57,10 +60,20 @@ struct btree {
     telemetry_point_t* data_p;
 }; typedef struct btree btree_t;
 
+/* The root of a btree */
+struct root {
+    /* The root of the btree */
+    btree_t* root;
+    /* The number of entries in a btree. Equal to the maximum index */
+    int number_of_entries;
+}; typedef struct root root_t;
+
 /*FUNCTION PROTOTYPES*/
 
-/* Creates a binary tree. Always use this function to create the top level node,
-and set it's parent to NULL */
+/* Creates a binary tree root */
+root_t* create_root();
+
+/* Creates a binary tree node */
 btree_t* create_b_tree(btree_t* parent);
 
 /* A tool for creating telemetry points. It handles memory allocation. */
@@ -80,6 +93,12 @@ void add_telemetry_point(unsigned int index, btree_t* root,
 void delete_datastructure(btree_t* root);
 
 /* FUNCTION DEFINITIONS */
+
+root_t* create_root() {
+    root_t* new_root = (root_t*)malloc(sizeof(root_t));
+    (*new_root).root = create_b_tree(NULL);
+    (*new_root).number_of_entries = 0; 
+}
 
 btree_t* create_b_tree(btree_t* parent){
     btree_t* new_b_tree = (btree_t*)malloc(sizeof(btree_t));
@@ -112,8 +131,8 @@ telemetry_point_t* create_telemetry_point(
 return(t_p_p);
 }
 
-telemetry_point_t* get_telemetry_point(unsigned int index, btree_t* root) {
-    btree_t current_node = *root;
+telemetry_point_t* get_telemetry_point(unsigned int index, root_t* root) {
+    btree_t current_node = *(*root).root;
     while(index) {
         current_node = index&1 ? *current_node.r : *current_node.l;
         index = index >> 1;
@@ -121,9 +140,9 @@ telemetry_point_t* get_telemetry_point(unsigned int index, btree_t* root) {
     return(current_node.data_p);
 }
 
-void add_telemetry_point(unsigned int index, btree_t* root, 
+void add_telemetry_point(unsigned int index, root_t* root, 
     telemetry_point_t* telemetry_point_p) {
-        btree_t* current_node_p = root;
+        btree_t* current_node_p = (*root).root;
         btree_t* next_node_p;
     while(index) {
         next_node_p = index&1 ? (*current_node_p).r : (*current_node_p).l;
@@ -140,11 +159,12 @@ void add_telemetry_point(unsigned int index, btree_t* root,
         current_node_p = next_node_p;
         index = index >> 1;
     }
+    (*root).number_of_entries++;
     (*current_node_p).data_p = telemetry_point_p;
 }
 
-void delete_datastructure(btree_t* root) {
-    btree_t* current_node_p = root;
+void delete_datastructure(root_t* root) {
+    btree_t* current_node_p = (*root).root;
     btree_t* next_node_p;
     int exit = 0;
     while (!exit) {
@@ -169,11 +189,12 @@ void delete_datastructure(btree_t* root) {
             if((*current_node_p).data_p) {
                 free((*current_node_p).data_p);
             }
-            if(current_node_p == root) {
+            if(current_node_p == (*root).root) {
                 #ifdef DEBUG
                     printf("Freeing root, all branches handled.\n");
                 #endif
                 free(current_node_p);
+                free(root);
                 exit = 1;
             }
             if(!exit) {
@@ -194,3 +215,5 @@ void delete_datastructure(btree_t* root) {
         }
     }
 }
+
+#endif

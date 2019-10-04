@@ -4,6 +4,11 @@
  * Student ID: 13234505
  * Description: This header file contains standardized debug functionality.
 *******************************************************************************/
+
+/* Only define this functionality if it isn't already defined */
+#ifndef DEBUGHEADER
+#define DEBUGHEADER
+
 #include <stdio.h> /* Used for printf */
 
 /* If defined, activates debug features */
@@ -34,7 +39,7 @@
 
 /* Very high level debug. Only Michael should be calling, when changing menu
 section */
-void print_section_title(char* string) {
+void print_section_title(const char* string) {
     printf(TEXTBLUE(1));
     printf("\n"SECTIONTITLE"%s"SECTIONTITLE"\n",string);
     printf(TEXTDEFAULT);
@@ -42,7 +47,7 @@ void print_section_title(char* string) {
 
 /* Print in debug mode when the primary functions in a section are called.
 E.g., in crypto.c is called when encrypt() and decrypt() are called */
-void print_title(char* string) {
+void print_title(const char* string) {
     printf(TEXTRED(1));
     printf("\n"TITLE"%s"TITLE"\n",string);
     printf(TEXTDEFAULT);
@@ -50,8 +55,11 @@ void print_title(char* string) {
 
 /* Call within debug as a header for content within the debug mode.
 E.g., If you're printing an array of values in debug, use this as the header */
-void print_header(char* string) {
+void print_header(const char* string) {
     printf(TEXTRED(0));
     printf("%s",string);
     printf(TEXTDEFAULT);
 }
+
+/* End the initial if. */
+#endif
