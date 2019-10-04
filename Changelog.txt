@@ -3,3 +3,4 @@
 21/09/2019 - Main function implemented.
 25/09/2019 - Some minor changes to the top level file.
 29/09/2019 - Menu functionality added. Main redone. Added handlers for the menu functionality. Added temporary constant for maximum string size. Set temporary sizes for strings.
+02/10/2019 - Updated the menus to include headings indicating which menu they are. Seperated the menu functions into a seperate file from the top level. Updated the Makefile.

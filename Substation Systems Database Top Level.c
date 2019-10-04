@@ -143,6 +143,8 @@ void compression(void);
 *******************************************************************************/
 int main(void) { /* <- Coding standard here. UPDATE */
 	int selection;
+	printf("\n");
+	printf("SUBSTATION DATABASE\n");
 	/* Do while loop loops infinitely as the exit condition is the user entering
 	a 4 which in the switch case calls the program to exit */
 	/* This is just an initial format for the menu, it may need to be changed
@@ -170,6 +172,7 @@ int main(void) { /* <- Coding standard here. UPDATE */
 *******************************************************************************/
 void start_menu(void) {
 	printf("\n"
+	"START MENU\n"
     "1. Import CSV data\n"
     "2. Load database file\n"
     "3. File submenu\n"
@@ -229,6 +232,7 @@ int start_menu_handler(void) {
 *******************************************************************************/
 void file_menu(void) {
 	printf("\n"
+	"FILE MENU\n"
     "1. Search data\n"
     "2. Export CSV\n"
     "3. Export database file\n"
@@ -307,6 +311,7 @@ void load_data(void) {
 *******************************************************************************/
 void search_menu(void) {
 	printf("\n"
+	"SEARCH MENU\n"
     "1. Search by plant\n"
     "2. Search by desig\n"
     "3. Search by module\n"
