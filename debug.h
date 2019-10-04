@@ -2,7 +2,7 @@
  * DEBUG.H
  * Name: Owen Dowley
  * Student ID: 13234505
- * Description: This header contains standardized debug functionality.
+ * Description: This header file contains standardized debug functionality.
 *******************************************************************************/
 #include <stdio.h> /* Used for printf */
 
@@ -29,6 +29,7 @@
 /* Used to pad titles in debug mode */
 #define TITLE "//////////"
 
+/* Used to pad section titles in debug mode */
 #define SECTIONTITLE "<><><><><>"
 
 /* Very high level debug. Only Michael should be calling, when changing menu
