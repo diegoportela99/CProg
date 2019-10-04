@@ -29,6 +29,7 @@ void start_menu(void) {
     "2. Load database file\n"
     "3. File submenu\n"
     "4. Exit program\n"
+	"5. Debug mode\n"
     "Enter choice (number between 1-4)>\n");
 }
 
@@ -41,36 +42,46 @@ void start_menu(void) {
  * - int selection - Integer of the users selection
 *******************************************************************************/
 int start_menu_handler(void) {
+
+	char input[MAX_STRING_LEN];
+	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
-	/* Using scanf right now for convinience, will change for consistency */
-	scanf("%d", &selection); 
-	switch(selection) {
-		case 1 :
+	/* The atoi function turns a string input into a int. If unsuccessful
+	it returns a 0. This is used for error detection. */
+	selection = atoi(input);
+	if (selection != 0) {
+		switch(selection) {
+			case 1 :
 			
-			break;
-		case 2 :
+				break;
+			case 2 :
 			
-			break;
-		case 3 :
-			do {
-				file_menu();
-				selection = file_menu_handler();
-			}
-			while (selection != 4);
-			/* Change selection to 0 so that when selection is returned it does
-			not trigger the while clause in the main. Enabling the loop to 
-			continue. */
-			selection = 0;
-			break;	
-		case 4 :
-			exit(0);
-			break;
-		default :
-			printf("Invalid choice\n");
-			break;
+				break;
+			case 3 :
+				do {
+					file_menu();
+					selection = file_menu_handler();
+				}
+				while (selection != 4);
+				/* Change selection to 0 so that when selection is returned it does
+				not trigger the while clause in the main. Enabling the loop to 
+				continue. */
+				selection = 0;
+				break;	
+			case 4 :
+				exit(0);
+				break;
+			case 5 :
+				break;
+			default :
+				printf("Invalid choice\n");
+				break;
+		}
+	}
+	else {
+		printf("Invalid choice\n");
 	}
 	return selection;
-
 }
 
 /*******************************************************************************
@@ -102,29 +113,35 @@ void file_menu(void) {
  * - int selection - Integer of the users selection
 *******************************************************************************/
 int file_menu_handler(void) {
+	char input[MAX_STRING_LEN];
+	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
-	/* Using scanf right now for convinience, will change for consistency */
-	scanf("%d", &selection); 
-	switch(selection) {
-		case 1 :
-			do {
-				search_menu();
-				selection = search_menu_handler();
-			}
-			while (selection != 4);
-			selection = 0;
-			break;
-		case 2 :
-			
-			break;
-		case 3 :
-			
-			break;	
-		case 4 :			
-			break;
-		default :
-			printf("Invalid choice\n");
-			break;
+	selection = atoi(input);
+	if (selection != 0) {
+		switch(selection) {
+			case 1 :
+				do {
+					search_menu();
+					selection = search_menu_handler();
+				}
+				while (selection != 4);
+				selection = 0;
+				break;
+			case 2 :
+				
+				break;
+			case 3 :
+				
+				break;	
+			case 4 :			
+				break;
+			default :
+				printf("Invalid choice\n");
+				break;
+		}
+	}
+	else {
+		printf("Invalid choice\n");
 	}
 	return selection;
 }
@@ -158,25 +175,30 @@ void search_menu(void) {
  * - int selection - Integer of the users selection
 *******************************************************************************/
 int search_menu_handler(void) {
+	char input[MAX_STRING_LEN];
+	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
-	/* Using scanf right now for convinience, will change for consistency */
-	scanf("%d", &selection); 
-	switch(selection) {
-		case 1 :
-			
-			break;
-		case 2 :
-			
-			break;
-		case 3 :
-			
-			break;	
-		case 4 :			
-			break;
-		default :
-			printf("Invalid choice\n");
-			break;
+	selection = atoi(input);
+	if (selection != 0) {
+		switch(selection) {
+			case 1 :
+				
+				break;
+			case 2 :
+				
+				break;
+			case 3 :
+				
+				break;	
+			case 4 :			
+				break;
+			default :
+				printf("Invalid choice\n");
+				break;
+		}
+	}
+	else {
+		printf("Invalid choice\n");
 	}
 	return selection;
-
 }
