@@ -29,7 +29,6 @@ void start_menu(void) {
     "2. Load database file\n"
     "3. File submenu\n"
     "4. Exit program\n"
-	"5. Debug mode\n"
     "Enter choice (number between 1-4)>\n");
 }
 
@@ -42,7 +41,6 @@ void start_menu(void) {
  * - int selection - Integer of the users selection
 *******************************************************************************/
 int start_menu_handler(void) {
-
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
