@@ -3,27 +3,23 @@
 CC = gcc
 CCFLAGS = -Wall -Werror -ansi -lm
 
-SSD.out : start_menu.o file_menu.o import_data.o load_data.o LinkedList.o search_data.o search_plant.o search_desig.o search_module.o export_csv.o save_data.o
-	$(CC) $(CCFLAGS) -o SSD.out start_menu.o file_menu.o import_data.o load_data.o search_data.o search_plant.o search_desig.o search_module.o export_csv.o save_data.o
+SSD.out : Main.o Menus.o Import.o Export.o btree.o
+	$(CC) $(CCFLAGS) -o SSD.out Main.o Menus.o Import.o Export.o btree.o
 
-start_menu.out : 
+Main.o : Main.c Substation.h btree.h btree.o
+	$(CC) $(CCFLAGS) -c -o Main.o Main.c
 
-file_menu.out :
+Menus.o : Menus.c Substation.h btree.h btree.o
+	$(CC) $(CCFLAGS) -c -o Menus.o Menus.c
 
-import_data.out : 
+Import.o : Import.c Substation.h btree.h btree.o
+	$(CC) $(CCFLAGS) -c -o Import.o Import.c
 
-load_data.out :
+Export.o : Export.c Substation.h btree.h btree.o
+	$(CC) $(CCFLAGS) -c -o Export.o Export.c
 
-LinkedList :
+btree.o : btree.c btree.h debug.h
+	$(CC) $(CCFLAGS) -c -o btree.o btree.c
 
-search_data.out :
-
-search_plant.out :
-
-search_desig.out :
-
-search_module.out :
-
-export_csv.out :
-
-save_data.out :
+clean:
+	rm SSD.out Main.o Menus.o Import.o Export.o btree.o

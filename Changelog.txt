@@ -2,3 +2,7 @@
 20/09/2019 - Function Prototypes created. Header files added. Comment blocks added.
 21/09/2019 - Main function implemented.
 25/09/2019 - Some minor changes to the top level file.
+29/09/2019 - Menu functionality added. Main redone. Added handlers for the menu functionality. Added temporary constant for maximum string size. Set temporary sizes for strings.
+02/10/2019 - Updated the menus to include headings indicating which menu they are. Seperated the menu functions into a seperate file from the top level. Updated the Makefile.
+04/10/2019 - Created a new c file for the export functions. Developed a first version of the export to csv function.
+04/10/2019 - Updated the export function to use new improvements to the btree. Improved error detection in the menus. Added a debug option in the start menu.
