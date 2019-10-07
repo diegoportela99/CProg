@@ -113,3 +113,32 @@ int main(void) { /* <- Coding standard here. UPDATE */
 		    default: /* Invalid state reached */
 		}
 	} 
+
+	struct telemetry_point {
+	/*the location of the substation*/
+	char location[MAX_STRING_LEN]; 
+	/*A unique code given to each piece of equipment*/
+	char desig[MAX_STRING_LEN];
+	/*the type of equipment, eg. Cb = circuit breaker*/
+	char plant[MAX_STRING_LEN];
+	/*eg. voltage level 11kV*/
+	char network[MAX_STRING_LEN];
+	/*The name of the actual point eg. oil temperature*/
+	char quantity[MAX_STRING_LEN];
+	/*Always DNP in this case, comms protocol that talks to master station*/
+	char protocol[MAX_STRING_LEN];
+	/*channel number of the module */
+	char number[MAX_STRING_LEN];
+	/*the module address for master station communications*/
+	char address[MAX_STRING_LEN];
+	/*what type of signal, eg. analog, digital etc*/
+	char moduletype[MAX_STRING_LEN];
+	/*has the telemetry failed at the time of CSV save*/
+	char failed[MAX_STRING_LEN];
+	/*Is the telemetry online when CSV saved*/
+	char online[MAX_STRING_LEN];
+	/*same as failed*/
+	char faulty[MAX_STRING_LEN];
+	/* Out of service */
+	char oos[MAX_STRING_LEN]; 
+}; typedef struct telemetry_point telemetry_point_t;
