@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include "Substation.h"
+#include "btree.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -20,11 +21,20 @@
  * outputs:
  * - none
 *******************************************************************************/
-void start_menu(void) {
-	printf("\n"
-    "\033[1;31m"
-	"START MENU\n"
-    "\033[0m"
+void start_menu(int argc) {
+	/* Checks if a different colour mode is activated at runtime
+	if not, the heading is printed in red */
+	if (argc <= 1) {
+		printf("\n"
+		"\033[1;31m"
+		"START MENU\n"
+    	"\033[0m");
+	}
+	else {
+		printf("\n"
+		"START MENU\n");
+	}
+	printf(
     "1. Import CSV data\n"
     "2. Load database file\n"
     "3. File submenu\n"
@@ -40,7 +50,7 @@ void start_menu(void) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int start_menu_handler(void) {
+int start_menu_handler(root_t* root_p, int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -50,23 +60,26 @@ int start_menu_handler(void) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-			
+				import_csv(root_p);
 				break;
 			case 2 :
 			
 				break;
 			case 3 :
 				do {
-					file_menu();
-					selection = file_menu_handler();
+					file_menu(argc);
+					selection = file_menu_handler(root_p, argc);
 				}
 				while (selection != 4);
-				/* Change selection to 0 so that when selection is returned it does
-				not trigger the while clause in the main. Enabling the loop to 
-				continue. */
+				/* Changes selection to 0 so that when selection is returned
+				it does not trigger the while clause in the main. Enabling
+				the loop to continue. */
 				selection = 0;
 				break;	
 			case 4 :
+				/* Reverts the text colour to default and terminates
+				the program */
+				printf("\033[0m");
 				exit(0);
 				break;
 			case 5 :
@@ -90,11 +103,20 @@ int start_menu_handler(void) {
  * outputs:
  * - none
 *******************************************************************************/
-void file_menu(void) {
-	printf("\n"
-	"\033[1;31m"
-	"FILE MENU\n"
-	"\033[0m"
+void file_menu(int argc) {
+	/* Checks if a different colour mode is activated at runtime
+	if not, the heading is printed in red */
+	if (argc <= 1) {
+		printf("\n"
+		"\033[1;31m"
+		"FILE MENU\n"
+    	"\033[0m");
+	}
+	else {
+		printf("\n"
+		"FILE MENU\n");
+	}
+	printf(
     "1. Search data\n"
     "2. Export CSV\n"
     "3. Export database file\n"
@@ -110,7 +132,7 @@ void file_menu(void) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int file_menu_handler(void) {
+int file_menu_handler(root_t* root_p, int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -119,14 +141,14 @@ int file_menu_handler(void) {
 		switch(selection) {
 			case 1 :
 				do {
-					search_menu();
-					selection = search_menu_handler();
+					search_menu(argc);
+					selection = search_menu_handler(argc);
 				}
 				while (selection != 4);
 				selection = 0;
 				break;
 			case 2 :
-				
+				export_csv(root_p);
 				break;
 			case 3 :
 				
@@ -152,11 +174,20 @@ int file_menu_handler(void) {
  * outputs:
  * - none
 *******************************************************************************/
-void search_menu(void) {
-	printf("\n"
-	"\033[1;31m"
-	"SEARCH MENU\n"
-	"\033[0m"
+void search_menu(int argc) {
+	/* Checks if a different colour mode is activated at runtime
+	if not, the heading is printed in red */
+	if (argc <= 1) {
+		printf("\n"
+		"\033[1;31m"
+		"SEARCH MENU\n"
+    	"\033[0m");
+	}
+	else {
+		printf("\n"
+		"SEARCH MENU\n");
+	}
+	printf(
     "1. Search by plant\n"
     "2. Search by desig\n"
     "3. Search by module\n"
@@ -172,7 +203,7 @@ void search_menu(void) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int search_menu_handler(void) {
+int search_menu_handler(int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
