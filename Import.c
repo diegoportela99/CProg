@@ -8,8 +8,8 @@ void import_csv(root_t* root_p) {
     char filename[MAX_STRING_LEN];
     printf("Please enter the name of the csv file: ");
     fgets(filename, MAX_STRING_LEN, stdin);
+    /* Removes the newline from the filename */
     sscanf(filename, "%[^\n]", filename);
-    /*fgets(filename, MAX_STRING_LEN, stdin);*/
     FILE * substation_database;
     substation_database = fopen(filename, "r");
     printf("%s\n", filename);
@@ -20,6 +20,7 @@ void import_csv(root_t* root_p) {
 
         int loopVar = 0;
         char* eof = filename;
+        /* Counts the amount of data points in the file */
         while (eof!=NULL) {
             char buffer[MAX_STRING_LEN];
             eof = fgets(buffer,MAX_STRING_LEN,substation_database);
@@ -28,46 +29,38 @@ void import_csv(root_t* root_p) {
         #ifdef DETAILEDDEBUG
             printf("Loop var: %d\n", loopVar);
         #endif
+        /* Returns to the start of the file */
         rewind(substation_database);
 
         while (loopVar > 0) {
+            /* Recreates the telemetry_point struct to store the data */
             char buffer[MAX_STRING_LEN*10];
-            /*the location of the substation*/
             char location[MAX_STRING_LEN]; 
-            /*A unique code given to each piece of equipment*/
             char desig[MAX_STRING_LEN];
-            /*the type of equipment, eg. Cb = circuit breaker*/
             char plant[MAX_STRING_LEN];
-            /*eg. voltage level 11kV*/
             char network[MAX_STRING_LEN];
-            /*The name of the actual point eg. oil temperature*/
             char quantity[MAX_STRING_LEN];
-            /*Always DNP in this case, comms protocol that talks to master station*/
             char protocol[MAX_STRING_LEN];
-            /*channel number of the module */
             char number[MAX_STRING_LEN];
-            /*the module address for master station communications*/
             char address[MAX_STRING_LEN];
-            /*what type of signal, eg. analog, digital etc*/
             char moduletype[MAX_STRING_LEN];
-            /*has the telemetry failed at the time of CSV save*/
             char failed[MAX_STRING_LEN];
-            /*Is the telemetry online when CSV saved*/
             char online[MAX_STRING_LEN];
-            /*same as failed*/
             char faulty[MAX_STRING_LEN];
-            /* Out of service */
             char oos[MAX_STRING_LEN]; 
             fgets(buffer, sizeof(buffer),substation_database);
+            /* Reads in the data point */
             sscanf(buffer, "%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,],%[^,]",
             location, desig, plant, network, quantity, protocol, number,
             address, moduletype, failed, online, faulty, oos);
+            /* Creates a new data point with the collected data */
             telemetry_point_t* t_p_p = create_telemetry_point(location, desig, plant, network, quantity,
             protocol, number, address, moduletype, failed, online, faulty,
             oos);
             add_telemetry_point(((*root_p).number_of_entries), root_p, t_p_p);
             loopVar--;
         }
+        printf("SUCCESS\n");
         #ifdef DETAILEDDEBUG
             int i;
             printf("Reading memory");
