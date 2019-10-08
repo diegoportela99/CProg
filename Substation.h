@@ -44,13 +44,9 @@ void load_data(void);
 /* Prints the search menu */
 void search_menu(void);
 /* Handles user input for search_menu */
-int search_menu_handler(void);
-/* Searches the csv by plant */
-void search_plant(void);
-/* Searches the csv by desig */
-void search_desig(void);
-/* Searches the csv by module */
-void search_module(void);
+int search_menu_handler(root_t* root_p);
+/* Searches the csv */
+void search(root_t* root, int search_criteria);
 /* Exports the data as a csv */
 void export_csv(root_t* root_p);
 /* Exports the database file */

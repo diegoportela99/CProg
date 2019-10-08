@@ -123,7 +123,7 @@ int file_menu_handler(root_t* root_p) {
 			case 1 :
 				do {
 					search_menu();
-					selection = search_menu_handler();
+					selection = search_menu_handler(root_p);
 				}
 				while (selection != 4);
 				selection = 0;
@@ -175,7 +175,7 @@ void search_menu(void) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int search_menu_handler(void) {
+int search_menu_handler(root_t* root_p) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -183,13 +183,13 @@ int search_menu_handler(void) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-				
+				search(root_p,selection);
 				break;
 			case 2 :
-				
+				search(root_p,selection);
 				break;
 			case 3 :
-				
+				search(root_p,selection);
 				break;	
 			case 4 :			
 				break;
