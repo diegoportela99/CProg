@@ -8,6 +8,7 @@
 *******************************************************************************/
 
 #include "btree.h"
+#include "block.h"
 
 /*******************************************************************************
  * Constants
@@ -39,6 +40,10 @@ void load_data(void);
 /* Prints the search menu */
 void search_menu(int argc);
 /* Handles user input for search_menu */
+int search_menu_handler(root_t* root_p);
+/* Searches the csv */
+void search(root_t* root, int search_criteria);
+
 int search_menu_handler(int argc);
 /* Searches the csv by plant */
 void search_plant(void);
@@ -50,4 +55,9 @@ void search_module(void);
 void export_csv(root_t* root_p);
 /* Exports the database file */
 void save_data(void);
+/* Breaks data from structure into 64 bit chunks for encryption */
+block_t* chunk (root_t* root_p);
+/* Encrypts 64 bit blocks of plaintext, given an array of plaintext blocks,
+   the number of blocks of plaintext, and a key. Writes ciphertext to file. */
+int encrypt(block_t* block_p);
 

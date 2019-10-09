@@ -10,6 +10,7 @@
 
 #include "Substation.h"
 #include "btree.h"
+#include "block.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -21,6 +22,13 @@
  * outputs:
  * - none
 *******************************************************************************/
+
+void start_menu(void) {
+    printf("\n"
+    "\033[1;31m"
+    "START MENU\n"
+    "\033[0m"
+
 void start_menu(int argc) {
 	/* Checks if a different colour mode is activated at runtime
 	if not, the heading is printed in red */
@@ -35,6 +43,7 @@ void start_menu(int argc) {
 		"START MENU\n");
 	}
 	printf(
+
     "1. Import CSV data\n"
     "2. Load database file\n"
     "3. File submenu\n"
@@ -50,6 +59,48 @@ void start_menu(int argc) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
+
+int start_menu_handler(root_t* root_p) {
+    char input[MAX_STRING_LEN];
+    fgets(input, MAX_STRING_LEN, stdin);
+    int selection;
+    /* The atoi function turns a string input into a int. If unsuccessful
+    it returns a 0. This is used for error detection. */
+    selection = atoi(input);
+    if (selection != 0) {
+        switch(selection) {
+            case 1 :
+                import_csv(root_p);
+                break;
+            case 2 :
+            
+                break;
+            case 3 :
+                do {
+                    file_menu();
+                    selection = file_menu_handler(root_p);
+                }
+                while (selection != 4);
+                /* Change selection to 0 so that when selection is returned it does
+                not trigger the while clause in the main. Enabling the loop to 
+                continue. */
+                selection = 0;
+                break;    
+            case 4 :
+                exit(0);
+                break;
+            case 5 :
+                break;
+            default :
+                printf("Invalid choice\n");
+                break;
+        }
+    }
+    else {
+        printf("Invalid choice\n");
+    }
+    return selection;
+
 int start_menu_handler(root_t* root_p, int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
@@ -93,6 +144,7 @@ int start_menu_handler(root_t* root_p, int argc) {
 		printf("Invalid choice\n");
 	}
 	return selection;
+
 }
 
 /*******************************************************************************
@@ -103,6 +155,13 @@ int start_menu_handler(root_t* root_p, int argc) {
  * outputs:
  * - none
 *******************************************************************************/
+
+void file_menu(void) {
+    printf("\n"
+    "\033[1;31m"
+    "FILE MENU\n"
+    "\033[0m"
+
 void file_menu(int argc) {
 	/* Checks if a different colour mode is activated at runtime
 	if not, the heading is printed in red */
@@ -117,6 +176,7 @@ void file_menu(int argc) {
 		"FILE MENU\n");
 	}
 	printf(
+
     "1. Search data\n"
     "2. Export CSV\n"
     "3. Export database file\n"
@@ -132,6 +192,43 @@ void file_menu(int argc) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
+
+int file_menu_handler(root_t* root_p) {
+    char input[MAX_STRING_LEN];
+    fgets(input, MAX_STRING_LEN, stdin);
+    int selection;
+    selection = atoi(input);
+    if (selection != 0) {
+        switch(selection) {
+            case 1 :
+                do {
+                    search_menu();
+                    selection = search_menu_handler(root_p);
+                }
+                while (selection != 4);
+                selection = 0;
+                break;
+            case 2 :
+                export_csv(root_p);
+                break;
+            case 3 :
+                /* Empty statement to make C happy. Required because case 3 
+                is a label and only statements can follow labels */;
+                block_t* block_p = chunk(root_p);
+                encrypt(block_p);
+                break;
+            case 4 :
+                break;
+            default :
+                printf("Invalid choice\n");
+                break;
+        }
+    }
+    else {
+        printf("Invalid choice\n");
+    }
+    return selection;
+
 int file_menu_handler(root_t* root_p, int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
@@ -174,6 +271,13 @@ int file_menu_handler(root_t* root_p, int argc) {
  * outputs:
  * - none
 *******************************************************************************/
+
+void search_menu(void) {
+    printf("\n"
+    "\033[1;31m"
+    "SEARCH MENU\n"
+    "\033[0m"
+
 void search_menu(int argc) {
 	/* Checks if a different colour mode is activated at runtime
 	if not, the heading is printed in red */
@@ -203,6 +307,35 @@ void search_menu(int argc) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
+
+int search_menu_handler(root_t* root_p) {
+    char input[MAX_STRING_LEN];
+    fgets(input, MAX_STRING_LEN, stdin);
+    int selection;
+    selection = atoi(input);
+    if (selection != 0) {
+        switch(selection) {
+            case 1 :
+                search(root_p,selection);
+                break;
+            case 2 :
+                search(root_p,selection);
+                break;
+            case 3 :
+                search(root_p,selection);
+                break;    
+            case 4 :            
+                break;
+            default :
+                printf("Invalid choice\n");
+                break;
+        }
+    }
+    else {
+        printf("Invalid choice\n");
+    }
+    return selection;
+
 int search_menu_handler(int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
