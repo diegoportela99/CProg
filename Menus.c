@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include "Substation.h"
+#include "Compression.h"
 #include "btree.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -142,7 +143,7 @@ int file_menu_handler(root_t* root_p, int argc) {
 			case 1 :
 				do {
 					search_menu(argc);
-					selection = search_menu_handler(argc);
+					selection = search_menu_handler(root_p, argc);
 				}
 				while (selection != 4);
 				selection = 0;
@@ -203,7 +204,7 @@ void search_menu(int argc) {
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int search_menu_handler(int argc) {
+int search_menu_handler(root_t* root_p, int argc) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -211,15 +212,131 @@ int search_menu_handler(int argc) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-				
+				search(root_p, selection);
 				break;
 			case 2 :
-				
+				search(root_p, selection);
 				break;
 			case 3 :
-				
+				search(root_p, selection);
 				break;	
 			case 4 :			
+				break;
+			default :
+				printf("Invalid choice\n");
+				break;
+		}
+	}
+	else {
+		printf("Invalid choice\n");
+	}
+	return selection;
+}
+
+/*******************************************************************************
+ * This function prints the compression debug menu.
+ * Developer: Michael Lardner
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+*******************************************************************************/
+void compression_debug_menu(void) {
+	printf("\n"
+	"\033[1;31m"
+	"COMPRESSION DEBUG MENU\n"
+    "\033[0m"
+    "1. Import CSV data\n"
+    "2. Test Compression\n"
+	"3. Exit program\n"
+    "Enter choice (number between 1-3)>\n");
+}
+
+/*******************************************************************************
+ * This functions handles user input for the compression debug menu
+ * Developer: Michael Lardner
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+int compression_debug_menu_handler(root_t* root_p, int argc) {
+	char input[MAX_STRING_LEN];
+	fgets(input, MAX_STRING_LEN, stdin);
+	int selection;
+	selection = atoi(input);
+	if (selection != 0) {
+		switch(selection) {
+			case 1 :
+				import_csv(root_p);
+				break;
+			case 2 :
+				Compression(root_p);
+				break;
+			case 3 :
+				exit(0);
+				break;
+			default :
+				printf("Invalid choice\n");
+				break;
+		}
+	}
+	else {
+		printf("Invalid choice\n");
+	}
+	return selection;
+}
+
+/*******************************************************************************
+ * This functions handles user input for the start menu
+ * Developer: Michael Lardner
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+void colour_menu(void) {
+		printf("\n"
+	"\033[1;31m"
+	"COlOUR MENU\n"
+    "\033[0m"
+    "1. Yellow Mode\n"
+    "2. Green Mode\n"
+	"3. Blue Mode\n"
+	"4. Red Mode\n"
+    "Enter choice (number between 1-4)>\n");
+}
+
+/*******************************************************************************
+ * This function handles user input for the colour menu
+ * Developer: Michael Lardner
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
+int colour_menu_handler(void) {
+	char input[MAX_STRING_LEN];
+	fgets(input, MAX_STRING_LEN, stdin);
+	int selection;
+	selection = atoi(input);
+	if (selection != 0) {
+		switch(selection) {
+			case 1 :
+				printf("\033[01;33m");
+				printf("YELLOW MODE ACTIVATED\n");
+				break;
+			case 2 :
+				printf("\033[01;32m");
+				printf("GREEN MODE ACTIVATED\n");
+				break;
+			case 3 :
+				printf("\033[01;34m");
+				printf("BLUE MODE ACTIVATED\n");
+				break;
+			case 4 :
+				printf("\033[1;31m");
+				printf("RED MODE ACTIVATED\n");
 				break;
 			default :
 				printf("Invalid choice\n");

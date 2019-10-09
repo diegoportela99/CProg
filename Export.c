@@ -13,36 +13,53 @@
 #include <stdio.h>
 #include <string.h>
 
+/*******************************************************************************
+ * This functions exports the current database as a csv file
+ * Developer: Michael Lardner
+ * inputs:
+ * - none
+ * outputs:
+ * - int selection - Integer of the users selection
+*******************************************************************************/
 void export_csv(root_t* root_p) {
-    int loopVar;
-    char filename[MAX_STRING_LEN];
-    printf("Please enter a name for the csv file (Exclude .csv): ");
-    fgets(filename, MAX_STRING_LEN, stdin);
-    /* Removes the newline from the filename */
-    sscanf(filename, "%[^\n]", filename);
-    /* Makes the file a csv file */
-    strcat(filename, ".csv");
-    FILE * substation_database;
-    substation_database = fopen(filename, "w");
-    for (loopVar = 0; loopVar < (*root_p).number_of_entries-1; loopVar++) {
-        /* Gets the data point at the specified index */
-        telemetry_point_t* current = get_telemetry_point(loopVar, root_p);
-        /* Prints the data point to the new file */
-        fprintf(substation_database, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", 
-        (*current).location, (*current).desig, (*current).plant, (*current).network, 
-        (*current).quantity, (*current).protocol, (*current).number, (*current).address, 
-        (*current).moduletype, (*current).failed, (*current).online, (*current).faulty, 
-        (*current).oos);
-        #ifdef DEBUG
-        printf("Loopvar: %d ", loopVar);
-        fprintf(textp, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", 
-        (*current).location, (*current).desig, (*current).plant, (*current).network, 
-        (*current).quantity, (*current).protocol, (*current).number, (*current).address, 
-        (*current).moduletype, (*current).failed, (*current).online, (*current).faulty, 
-        (*current).oos);
-        #endif
+    if (root_p->number_of_entries > 0) {
+        int loopVar;
+        char filename[MAX_STRING_LEN];
+        printf("Please enter a name for the csv file (Exclude .csv): ");
+        fgets(filename, MAX_STRING_LEN, stdin);
+        /* Removes the newline from the filename */
+        sscanf(filename, "%[^\n]", filename);
+        /* Makes the file a csv file */
+        strcat(filename, ".csv");
+        FILE * substation_database;
+        substation_database = fopen(filename, "w");
+        for (loopVar = 0; loopVar < (*root_p).number_of_entries-1; loopVar++) {
+            /* Gets the data point at the specified index */
+            telemetry_point_t* current = get_telemetry_point(loopVar, root_p);
+            /* Prints the data point to the new file */
+            fprintf(substation_database, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
+            ",%s,\n", 
+            (*current).location, (*current).desig, (*current).plant,
+            (*current).network, (*current).quantity, (*current).protocol,
+            (*current).number, (*current).address, (*current).moduletype,
+            (*current).failed, (*current).online, (*current).faulty, 
+            (*current).oos);
+            #ifdef DEBUG
+            printf("Loopvar: %d ", loopVar);
+            fprintf(textp, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", 
+            (*current).location, (*current).desig, (*current).plant,
+            (*current).network, (*current).quantity, (*current).protocol,
+            (*current).number, (*current).address, (*current).moduletype, 
+            (*current).failed, (*current).online, (*current).faulty, 
+            (*current).oos);
+            #endif
+        }
+        printf("Export Success\n");
+        fclose(substation_database);
     }
-    fclose(substation_database);
+    else {
+        printf("No data in memory. Please use the import function first.\n");
+    }
 }
 
 /*
