@@ -15,4 +15,6 @@ block_t* create_block(block_t* previous);
 
 block_t* add_char_to_block(block_t* block_p, char c);
 
+block_t* add_ull_to_block(block_t* block_p, unsigned long long number);
+
 #endif

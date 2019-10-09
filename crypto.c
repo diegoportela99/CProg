@@ -35,7 +35,7 @@
 *******************************************************************************/
 
 /* Decrypts a file into 64 bit blocks of plaintext, given a key. */
-int decrypt(unsigned long long* plaintext_p);
+block_t* decrypt();
 
 /*******************************************************************************
  * This function encrypts an array of blocks of plaintext, and saves the
@@ -109,31 +109,31 @@ int encrypt(block_t* block_p) {
 /*******************************************************************************
  * Decrypt
 *******************************************************************************/
-int decrypt(unsigned long long* plaintext_p) {
-    
+block_t* decrypt() {
+    unsigned long long* plaintext_p;
+    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
+    /* We need to hang onto the last generated key_cycle_p so we can hand it
+    to free_key_cycles */
+    key_cycle_t* last_key_cycle_p;
+    int cipherBlocks,i;
+    unsigned long long* ciphertext_p = NULL;\
+    /* Used to return */
+    block_t* block_p;
+
     #ifdef DEBUG
         print_title("DECRYTPING");
     #endif
 
-    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
-
     file_handle_key(key,0);
-
-    /* We need to hang onto the last generated key_cycle_p so we can hand it
-    to free_key_cycles */
-    key_cycle_t* last_key_cycle_p;
-
-    int cipherBlocks,i;
-    unsigned long long* ciphertext_p = NULL;
-    if(plaintext_p == NULL) {
-        printf("AAHH NULL POINTER DEBUG");
-    }
 
     cipherBlocks = read_header();
     if(!cipherBlocks) {
         printf("Loading ciphertext failed\n");
         return(0);
     }
+
+    plaintext_p = (unsigned long long*)malloc(sizeof(unsigned long long)
+        *cipherBlocks);
 
     ciphertext_p = load_ciphertext(cipherBlocks);
     
@@ -162,10 +162,13 @@ int decrypt(unsigned long long* plaintext_p) {
         }
     #endif
 
+    for(i=0;i<cipherBlocks;i++) {
+        block_p = add_ull_to_block(block_p,*(plaintext_p+i));
+    }
+    free(plaintext_p);
     free(ciphertext_p);
     ciphertext_p = NULL;
-
     free_key_cycles(last_key_cycle_p);
     
-    return(1);
+    return(block_p);
 }

@@ -38,6 +38,9 @@ block_t* chunk (root_t* root_p) {
 return(block_p);
 }
 
+/*void dechunk(root_t* root_p, block_t* block_t) {
+}*/
+
 char* get_row_item(telemetry_point_t* tp_p, int row) {
     char* char_p;
     switch (row) {

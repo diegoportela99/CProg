@@ -40,4 +40,4 @@ debug.o : debug.c debug.h
 	$(CC) $(CCFLAGS) -c -o debug.o debug.c
 
 clean:
-	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o block.o chunk.o crypto.o cryptohelper.o debug.o
+	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o block.o chunk.o crypto.o cryptohelper.o debug.o key

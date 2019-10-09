@@ -24,6 +24,12 @@ block_t* create_block(block_t* previous) {
     return(block_p);
 }
 
+block_t* add_ull_to_block(block_t* block_p, unsigned long long number) {
+    block_p->number = number;
+    block_p = create_block(block_p);
+    return(block_p);
+}
+
 block_t* add_char_to_block(block_t* block_p, char c) {
     /* If there isn't enough room for another char in this block,
     make us a new block. */
