@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include "debug.h"
 
+/* Used to pad titles in debug mode */
+#define TITLE "//////////"
+
+/* Used to pad section titles in debug mode */
+#define SECTIONTITLE "<><><><><>"
+
 /* Very high level debug. Only Michael should be calling, when changing menu
 section */
 void print_section_title(char* string) {

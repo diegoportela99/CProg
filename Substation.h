@@ -7,6 +7,7 @@
 * Description: ...
 *******************************************************************************/
 #include "btree.h"
+#include "block.h"
 
 /*******************************************************************************
  * Constants
@@ -51,4 +52,9 @@ void search(root_t* root, int search_criteria);
 void export_csv(root_t* root_p);
 /* Exports the database file */
 void save_data(void);
+/* Breaks data from structure into 64 bit chunks for encryption */
+block_t* chunk (root_t* root_p);
+/* Encrypts 64 bit blocks of plaintext, given an array of plaintext blocks,
+   the number of blocks of plaintext, and a key. Writes ciphertext to file. */
+int encrypt(block_t* block_p);
 

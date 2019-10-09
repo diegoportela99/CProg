@@ -26,12 +26,6 @@
    bold, 0 means normal. */
 #define TEXTBLUE(x) "\033["#x";34m"
 
-/* Used to pad titles in debug mode */
-#define TITLE "//////////"
-
-/* Used to pad section titles in debug mode */
-#define SECTIONTITLE "<><><><><>"
-
 void print_section_title(char* string);
 void print_title(char* string);
 void print_header(char* string);
