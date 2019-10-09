@@ -10,12 +10,27 @@
 #include "Substation.h"
 #include "btree.h"
 #include <stdio.h>
-
+#include <string.h>
 
 /*******************************************************************************
  * Main
 *******************************************************************************/
 int main(int argc, char* argv[]) {
+	if (argc > 1) {
+		/* Checks if the user has entered the runtime command for
+		yellow mode, and if so, changes the text colour to yellow */
+		if (strcmp(argv[1], "-y") == 0) {
+			printf("\033[01;33m");
+			printf("YELLOW MODE ACTIVATED\n");
+		}
+		else {
+			/* If a non valid runtime command is entered, the program
+			is terminated */
+			printf("Please enter a valid run mode\n");
+			return (0);
+		}
+	}
+	/* Creates the root for the binary tree data structure */
 	root_t* root_p = create_root();
 	int selection;
 	printf("\n");
@@ -42,12 +57,9 @@ int main(int argc, char* argv[]) {
 	/* Do while loop loops infinitely as the exit condition is the user entering
 	a 4 which in the switch case calls the program to exit */
 	do {
-    	start_menu();
-		selection = start_menu_handler(root_p);
+    	start_menu(argc);
+		selection = start_menu_handler(root_p, argc);
 	}
-	while (selection != 4 && selection != 5);
-	if (selection == 5) {
-
-	}
+	while (selection != 4);
 	return(0);
 }
