@@ -169,7 +169,7 @@ void Compression (root_t* root_p) {
 	#ifdef DEBUG
 	for(i=0;i<size;i++)
 	{
-		printf("consolidated chars are %c & %d",str_consol[i],str_consol[i]);
+		printf("consolidated chars are %c & ASCII Code  %d",str_consol[i],str_consol[i]);
 		printf(" and they occur %d times\n",count_consol[i]);
 	}	
 	#endif
