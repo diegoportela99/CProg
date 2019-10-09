@@ -17,7 +17,27 @@
  * Note: it is worst practice to use your own cryptographic algorithms. Always
  * use standard algorithms - I recommend TwoFish, which is freely available.
  * Standard well-known algoritms have shown they can withstand modern 
- * cryptanalysis techniques - this code hasn't, and probably wouldn't.
+<<<<<<< HEAD
+ * cryptanalysis techniques - this code hasn't. This code is probably 
+ * cryptographically secure, but achieves this by merit of shuffling plaintext 
+ * much more repeatedly than a better designed cipher would need to. This 
+ * results in very slow performance.
+ * Additionally, this cipher is probably vulnerable to sidechannel attacks.
+*******************************************************************************/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "block.h"
+#include "debug.h"
+#include "cryptohelper.h"
+
+/*******************************************************************************
+ * Function Prototypes - Other prototypes in cryptohelper.h
+*******************************************************************************/
+
+/* Decrypts a file into 64 bit blocks of plaintext, given a key. */
+block_t* decrypt();
+ /* cryptanalysis techniques - this code hasn't, and probably wouldn't.
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
@@ -295,8 +315,24 @@ void free_key_cycles(key_cycle_t* key_cycle_p) {
  * outputs:
  * - 1 or 0 | Has encrytion succeeded ? 1 : 0
 *******************************************************************************/
-int encrypt(unsigned long long plaintext[], int number_of_blocks) {
+int encrypt(block_t* block_p) {
+
+    int i; /* iterator */
+    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
+    int number_of_blocks = block_p->number_of_blocks;
+    block_t* next_block_p;
+
+    #ifdef DEBUG
+        print_title("ENCRYTPING");
+    #endif
     
+    for(i=0;i<NUMBER_OF_KEY_BLOCKS;i++) {
+        /* Get key blocks from Cryptographically Secure Pseudo-Random Number
+        Generator */
+        key[i] = csprng(); 
+
+int encrypt(unsigned long long plaintext[], int number_of_blocks) {
+
     #ifdef DEBUG
         printf(TEXTRED(1));
         printf("\n"TITLE"ENCRYTPING"TITLE"\n");
@@ -331,13 +367,20 @@ int encrypt(unsigned long long plaintext[], int number_of_blocks) {
     for(i=0; i<number_of_blocks;i++) {
         key_cycle_p = key_schedule(key_cycle_p);
         #ifdef DETAILEDDEBUG
+            print_header("Scheduling key:\n");
+            printf("key_cycle_p = %p\n",key_cycle_p);
+        #endif
+        (*(ciphertext_p+i)) = feistel_network(block_p->number,*key_cycle_p,1);
+        next_block_p = block_p->previous;
+        /* FREE BLOCK_P */
+        free(block_p);
+        block_p = next_block_p;
             printf(TEXTRED(0));
             printf("Scheduling key %d:\n",i);
             printf(TEXTDEFAULT);
             printf("key_cycle_p = %p\n",key_cycle_p);
         #endif
         (*(ciphertext_p+i)) = feistel_network(plaintext[i],*key_cycle_p,1);
-        
     }
 
     save_ciphertext(ciphertext_p, number_of_blocks);
@@ -352,6 +395,23 @@ int encrypt(unsigned long long plaintext[], int number_of_blocks) {
 /*******************************************************************************
  * Decrypt
 *******************************************************************************/
+block_t* decrypt() {
+    unsigned long long* plaintext_p;
+    unsigned long long key[NUMBER_OF_KEY_BLOCKS];
+    /* We need to hang onto the last generated key_cycle_p so we can hand it
+    to free_key_cycles */
+    key_cycle_t* last_key_cycle_p;
+    int cipherBlocks,i;
+    unsigned long long* ciphertext_p = NULL;\
+    /* Used to return */
+    block_t* block_p;
+
+    #ifdef DEBUG
+        print_title("DECRYTPING");
+    #endif
+
+    file_handle_key(key,0);
+
 int decrypt(unsigned long long* plaintext_p) {
     
     #ifdef DEBUG
@@ -380,13 +440,19 @@ int decrypt(unsigned long long* plaintext_p) {
         return(0);
     }
 
+    plaintext_p = (unsigned long long*)malloc(sizeof(unsigned long long)
+        *cipherBlocks);
+
     ciphertext_p = load_ciphertext(cipherBlocks);
     
     key_cycle_t* key_cycle_p = init_key_cycle(key);
     
     for(i=0;i<cipherBlocks; i++) {
         key_cycle_p = key_schedule(key_cycle_p);
-                #ifdef DETAILEDDEBUG
+
+        #ifdef DETAILEDDEBUG
+            print_header("Scheduling key:\n");
+		#ifdef DETAILEDDEBUG
             printf(TEXTRED(0));
             printf("Scheduling key %d:\n",i);
             printf(TEXTDEFAULT);
@@ -403,13 +469,25 @@ int decrypt(unsigned long long* plaintext_p) {
     }
 
     #ifdef DEBUG
+        print_header("Returning plaintext:\n");
         printf(TEXTRED(0));
         printf("Returning plaintext:\n");
         printf(TEXTDEFAULT);
+
         for(i=0;i<cipherBlocks;i++) {
             printf("%llx\n",*(plaintext_p+i));
         }
-    #endif
+
+    for(i=0;i<cipherBlocks;i++) {
+        block_p = add_ull_to_block(block_p,*(plaintext_p+i));
+    }
+    free(plaintext_p);
+    free(ciphertext_p);
+    ciphertext_p = NULL;
+    free_key_cycles(last_key_cycle_p);
+    
+    return(block_p);
+}
 
     free(ciphertext_p);
     ciphertext_p = NULL;
