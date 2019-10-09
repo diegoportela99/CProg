@@ -14,6 +14,10 @@
  * Thie functionality can be reversed and return the data back to its original 
  * form also.
  * 
+ * original file =   767,792 bits
+ * compressed file = 462,828 bits
+ * 
+ * 39.72% reduction in size :)
 *******************************************************************************/
 
 /*******************************************************************************
@@ -22,20 +26,136 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h>
-#include "btree.h"
-#include "substation.h"
-#include "Compression.h"
-#include "debug.h"
+/* #include "debug.h"
+#include "Substation.h"
+#include "btree.h" */
 
 /*******************************************************************************
 *List of preprocessing directives
 *******************************************************************************/
+#define MAX_TREE_HT 100
+#define MAXLEN 999999
+#define ASCII_CODE 127
+#define FILENAME "Substation_module_data2.csv"
 
-/*#define DEBUG*/
 
 int Huffman_Code[20];
 
+/*******************************************************************************
+*List of data structures*
+*******************************************************************************/
 
+/* A Huffman tree node  */
+struct MinHeapNode { 
+
+	/*  One of the input characters  */
+	char data; 
+
+	/*  Frequency of the character  */
+	unsigned freq; 
+
+	/*  Left and right child of this node  */
+	struct MinHeapNode *left, *right; 
+}; 
+
+typedef struct MinHeapNode MinHeapNode_t;
+
+
+/* 
+A Min Heap: Collection of 
+ min-heap (or Huffman tree) nodes  */
+
+struct MinHeap { 
+
+	/*  Current size of min heap  */
+	unsigned size; 
+/* 
+	 capacity of min heap  */
+	unsigned capacity; 
+
+/* 	 Array of minheap node pointers  */
+	MinHeapNode_t** array; 
+}; 
+
+typedef struct MinHeap MinHeap_t;
+
+
+/* 
+A Min Heap: Collection of 
+ min-heap (or Huffman tree) nodes  */
+
+struct Huffman { 
+
+	/*  ASCII code  */
+	int data; 
+
+/*	 The Huffman code of character  */
+	int Huffman_Code[MAX_TREE_HT]; 
+
+	/* Size of Huffman code */
+	int size;
+
+}; 
+
+typedef struct Huffman Huffman_t;
+
+/*******************************************************************************
+ * Function prototypes 
+*******************************************************************************/
+/*  A utility function allocate a new 
+ min heap node with given character 
+ and frequency of the character  */
+MinHeapNode_t* newNode(char data, unsigned freq) ;
+
+/*  A utility function to create 
+ a min heap of given capacity  */
+struct MinHeap* createMinHeap(unsigned capacity);
+
+/*  A utility function to 
+ swap two min heap nodes  */
+void swapMinHeapNode(MinHeapNode_t** a, MinHeapNode_t** b) ;
+
+/*  The standard minHeapify function.  */
+void minHeapify(struct MinHeap* minHeap, int idx); 
+
+/*  A utility function to check  if size of heap is 1 or not  */
+int isSizeOne(struct MinHeap* minHeap); 
+
+/*  A standard function to extract  minimum value node from heap  */
+MinHeapNode_t* extractMin(MinHeap_t* minHeap) ;
+
+/* A utility function to insert  a new node to Min Heap  */
+void insertMinHeap(MinHeap_t* minHeap, MinHeapNode_t* MinHeapNode_t);
+
+/*  A standard function to build min heap  */
+void buildMinHeap(struct MinHeap* minHeap); 
+
+/*  A utility function to print an array of size n  */
+Huffman_t printArr(int str[], int n, int freq,char data);
+
+/*  A utility function to store Huffman codes  */
+Huffman_t write_Huff_array(int code[], int n, int ASCII, int freq);
+
+/*Update*/
+void displayflight (Huffman_t code1);
+
+/* Utility function to check if this node is leaf  */
+int isLeaf(MinHeapNode_t* root);
+
+/*  Creates a min heap of capacity equal to size and inserts all character of 
+ data[] in min heap. Initially size of min heap is equal to capacity  */
+MinHeap_t* createAndBuildMinHeap(char data[], int freq[], int size) ;
+
+/*  The main function that builds Huffman tree  */
+MinHeapNode_t* buildHuffmanTree(char data[], int freq[], int size);
+
+/*  Prints huffman codes from the root of Huffman Tree. 
+ 	It uses str[] to store codes  */
+void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tree[], int* row);
+
+/*  The main function that builds a Huffman Tree and print codes by
+    traversing the built Huffman Tree  */
+void HuffmanCodes(char data[], int count[], int size, Huffman_t tree[]);
 
 /*******************************************************************************
  * Main
@@ -43,59 +163,53 @@ int Huffman_Code[20];
 
 /*  Main function which takes input from user UPDATE */
 
-/*int main()*/
-void Compression (root_t* root_p) {
-	
-
-	int loopVar;
-
+int main() 
+{ 	
 	/*Maximum amount of characters which can be processed*/
-	char str_raw[MAXLEN];
-	strcpy(str_raw, "");
+	char str_raw[1000000];
 	/*The number each of ASCII characters occurances in the data set used*/
 	int count_raw[ASCII_CODE];
 	int i;
 
 
+	
 
+	
+	/*Update*/
 
-	/*import function to pull data in*/
+	/*This is only required of keyboard input is used as it was writing to stdin*/
+	/*fflush(stdin);*/
+	/*printf("Enter a word>\n");*/
+	/*fgets(str_raw,MAXLEN,stdin);*/
 
-	for (loopVar = 0; loopVar < (*root_p).number_of_entries-1; loopVar++) 
-	{
-		/* Gets the data point at the specified index */
-		telemetry_point_t* current = get_telemetry_point(loopVar, root_p);
-		strcat(str_raw,(*current).location); 
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).desig);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).plant);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).network); 
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).quantity);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).protocol);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).number);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).address);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).moduletype);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).failed);
-		strcat(str_raw,",");
-		strcat(str_raw,(*current).online);
-		strcat(str_raw,",");   
-		strcat(str_raw,(*current).faulty );
-		strcat(str_raw,","); 
-		strcat(str_raw,(*current).oos);
-		strcat(str_raw,",");
-		strcat(str_raw,"\n");
+ 	/*Update as required, once data comes from program this 
+	* can go or be left for debug
+	*/
 
-	}
+	/*Open file  in read mode to read in data until EOF is reached*/ 
+	FILE *textp;
+	textp=fopen(FILENAME,"r");
+	for (i=0;i<2000;i++)
+		while (fgets(str_raw,MAXLEN,textp)!= NULL);
+	fclose(textp); 	
 
+/* 	do {
+		c = fgetc(textp);
 
+		if (feof(textp))
+			break;
+		printf("%s",c);
+		
+	}	while(1); */
+/* 	printf("\n");
+
+	fclose(textp);
+	
+	for (i=0;i<10;i++){
+		str_raw[i]=c;
+		printf("%s",str_raw);
+	} */
+	
 
 	printf("Data compression is underway\n");
 
@@ -110,16 +224,52 @@ void Compression (root_t* root_p) {
     /*inits i to 0, for less than str length it will add 
 	* a value to the ASCII index of letter found 
 	*/
-  
-	for(i=0;i<strlen(str_raw);i++)
+    for(i=0;i<strlen(str_raw);i++)
     {
-        
-		count_raw[(int)str_raw[i]] ++;
-
+        count_raw[(int)str_raw[i]] ++;
+        #ifdef DEBUG
+		/*prints the string which was entered and the count at that point*/
+			printf("%c %d\n",str_raw[i],count_raw[(int)str_raw[i]]);
+		#endif	
     }
 	
 	
+ 	#ifdef DEBUG 
+	 for(i=0;i<ASCII_CODE;i++)
+	{
+		if (count_raw[(int)str_raw[i]]>0)
+			printf("char= %c count= %d\n",str_raw[i],count_raw[(int)str_raw[i]]);
+	
+	} 
+	
+	 #endif
 
+	
+	
+		
+/* 	for(i=0;i<strlen(str);i++)
+    {
+        if(count[(int)str[i]] > 0)
+        {
+            #ifdef DEBUG
+				printf("(loop)character: %c, Occurrences: %d\n",str[i],count[(int)str[i]]);
+			#endif
+            count[(int)str[i]]  = 0;
+        } 
+		
+
+    }
+	*/
+	
+	/*Loop which prints the size in bytes and ASCII code of each character */
+	/*     for(i=0;i<strlen(str_raw);i++)
+	 {
+		printf("size = %ld char = %d\n ",sizeof str_raw[i],str_raw[i]); 
+
+	 } 
+	*/
+
+	
 	/*Loop which is used to find out how many unique characters were entered
 	* by checking if the character occurs atleast once, if it doesn't it 
 	* keeps searching through the array, if it does occur atleast once it
@@ -132,7 +282,14 @@ void Compression (root_t* root_p) {
 		if (count_raw[j]>0){
 		size++;
 		
-	
+		#ifdef DEBUG
+		printf("character :%c occured atleast once\n",str_raw[j]);
+		/*Used to show the count of each character found */
+		printf("number of occurances are %d\n",count_raw[(int)str_raw[j]]);
+		printf("size of consoldated array is = %d\n",size);
+		#endif
+		
+
 		}
 		
 	}
@@ -166,44 +323,68 @@ void Compression (root_t* root_p) {
 	/*Debugging print statement to show that the raw count and 
 	* char have been transferred into the cut down colsolidated array.
 	*/
-	#ifdef DEBUG
-	for(i=0;i<size;i++)
-	{
-		printf("consolidated chars are %c & %d",str_consol[i],str_consol[i]);
+	
+	for(i=0;i<size;i++){
+		printf("consolidated chars are %c",str_consol[i]);
 		printf(" and they occur %d times\n",count_consol[i]);
+		
 	}	
-	#endif
 	
 	
+	int count_tot=0;
+	int tot_bits=0;
+	for (i=0;i<size;i++){
+		if (count_consol!=0)
+		count_tot = count_tot+count_consol[i];
 
+	}
+			tot_bits = (count_tot*8);
+		printf("Total bits = %d\n",tot_bits);
+	/*#endif*/
+
+	printf("Total chars are - %d\n",count_tot);
+	printf("\n");
+
+	/*for(i=0;i<ASCII_CODE;i++)
+		if(count_raw>0)*/
+
+ 		/*printf("count %d\n",i); */
+
+	
 
 	/*Send off the relvant consolidated data to the Huffman functions 
 	 *to build out tree and export data to the encryption step*/
 
 	Huffman_t tree[size];
 	HuffmanCodes(str_consol,count_consol,size,tree);
-	
-	
-	printf("\nThe Huffman encoded output is shown below;\n\n");
-	int k=0;
-	for (i=0;i<sizeof(str_raw);i++)
+	/* Test print returned data */
+	printf("***************************************\n******************************************");
+	for(i=0; i<size; i++)
 	{
-		
-		
-		for (j=0;j<size;j++)
-		{			
-			if(str_raw[i] == (char)tree[j].data)
-			{
-				if(str_raw[i] == (char)tree[j].data) 
-				{	for(k=0;k<tree[j].size;k++)
-					printf("%d",/*tree[j].data*/tree[j].Huffman_Code[k]);
-				}
-			}
+		printf("Data = %c, Huffman Code = ", tree[i].data);
+		for(j=0; j<tree[i].size; j++)
+		{
+			printf("%d", tree[i].Huffman_Code[j]);
 		}
+		printf("\n");
 	}
+	printf("***************************************\n******************************************");
+	
+	int k=0;
+	for (i=0;i<strlen(str_raw);i++){
+		printf("raw = %s\n",str_raw);}
+		for (j=0;j<size;j++){
+			printf("str_raw = %c & tree = %d\n",str_raw[i],tree[j].data);
+			i++;;
+			}
+			
+			if(str_raw[i] == (char)tree[j].data) {
+			for(k=0;k<tree[j].size;k++)
+			printf("%d",tree[j].Huffman_Code[k]);
+			}
 
-	printf("\nData compression is complete.\n");
-	/*return 0; */
+	printf("Data compression is complete.\n");
+	return 0; 
 } 
 
 /*******************************************************************************
@@ -392,16 +573,58 @@ Huffman_t printArr(int str[], int n, int freq,char data)
 { 
 	/*#ifdef DEBUG*/
 	int i=0; 
+	double code_count=0;
 	int j=0;
 	Huffman_t code1;
 
+
+	printf("Huffman code:");
+	for (i = 0; i < n; i++) {
+		printf("%d", str[i]);
+		code_count++;
+	}
+
+	code_count=(code_count*freq);	
+	printf(" bit count = %.0f",code_count); 
+	printf("\n"); 
+	
+	
+
+#ifdef DEBUG
+	printf("saving Huffman code:\n");
+	printf("stored code=\n");
+#endif
 	for (i = 0; i < n; ++i)  {
 		Huffman_Code[j] = str[i];
 		j++;
 		}
+	
+	printf("n = %d\n",n);
+		
+	
+	printf("Code is = ");
+	for (i=0;i<n;i++) {
+	printf("%d", Huffman_Code[i]);
+		
+	}
+
+	
+	printf(" & data = %c\n",data);
+	/*printf("string is %c\n",*Huffman_Code);*/
+		
+	
+	
+	printf("ASCII code is %d\n",data);
+
 
 	 code1=write_Huff_array(Huffman_Code,n,data,freq);
 
+
+	
+
+
+
+	/*#endif*/
 	return code1;
 } 
 
@@ -424,18 +647,66 @@ Huffman_t write_Huff_array(int code[], int n, int ASCII, int freq)
 
 	for (i = 0; i < n; i++)  {
 		code1.Huffman_Code[i] = code[j];
+		/*printf("%d\n",str[i]);*/
 		j++;
 		}
-
 	code1.size = n;
+	/*character_count++;*/
+	/*printf("character_count = %d\n",character_count);*/
+
+/* 	printf("Enter the ASCII code\n");
+	scanf(" %d" ,&code1.data); */
 	
-	code1.data = ASCII;
+	/*printf("written ASCII is %d & ",ASCII);*/
+	printf("Stored code = ");
+	for (i=0;i<n;i++) {
+		printf("%d",code1.Huffman_Code[i]);
+			
+	}
+	printf("\n");
+
 	
+		code1.data = ASCII;
+		
+		
+	printf("stored ASCII is %d\n",code1.data);
+
+	
+	/*printf("written n = %d\n",n);*/
+
+/* 	for (i=0;i<strlen(str_consol);i++)
+		if (str_consol[i] = allchar.data)
+			printf(" original %c becomes %d\n",str_consol[i],allchar.data); */
+
+	/*Huffman_t all_codes;*/
+	/*ReplaceCharWithCode (all_codes);*/
+
+
+
+
 	return code1;
 
+	
+
+	
+	
+
+	
 }
 
+/*******************************************************************************
+ * This function Update
+ * inputs:
+ * - update
+ * outputs:
+ * - update
+*******************************************************************************/
 
+void displayflight (Huffman_t code1)
+{
+    printf("%c %c %c  SYD %02d\n",
+    code1.Huffman_Code[0],code1.Huffman_Code[1],code1.Huffman_Code[2],code1.data);    
+}
 
 /*******************************************************************************
  * This function Update
@@ -481,7 +752,7 @@ MinHeap_t* createAndBuildMinHeap(char data[], int freq[], int size)
  * inputs:
  * - update
  * outputs:
- * - a MinHeapNode struct
+ * - update
 *******************************************************************************/
 
 MinHeapNode_t* buildHuffmanTree(char data[], int freq[], int size)  
@@ -523,11 +794,12 @@ MinHeapNode_t* buildHuffmanTree(char data[], int freq[], int size)
  * inputs:
  * - update
  * outputs:
- * - void
+ * - update
 *******************************************************************************/
 
 /***Huffman_t printCodes(MinHeapNode_t* root, int str[], int top, int size) ***/
 void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tree[], int* row) 
+
 { 
 	Huffman_t code1;
 
@@ -552,13 +824,25 @@ void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tre
 	 characters, print the character and its code from str[]  */
 	if (isLeaf(root)) { 
 
+		/*Update*/
+		printf("character - %c: occurences - %d ", root->data,root->freq); 
 		code1=printArr(str, top,root->freq,root->data);
+		printf("******************%d********************\n******************************************", *row);
 		tree[*row] = code1;
+		printf("******************%d********************\n******************************************", tree[*row].data);
 		*row = *row + 1;
 			
+		
+		/*write_Huff_array(str, top,size, root->data);*/ 
+
+	/***return code1;***/
 	
 	}
+	/***else return null; ***/
+
+
 	
+
 } 
 
 /*******************************************************************************
@@ -566,14 +850,22 @@ void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tre
  * inputs:
  * - update
  * outputs:
- * - void
+ * - update
 *******************************************************************************/
 
 /***void HuffmanCodes(char data[], int count[], int size)***/
 void HuffmanCodes(char data[], int count[], int size, Huffman_t tree[])
+
 { 
 	/*printf("Size is = %d\n",size);*/
+	#ifdef DEBUG
+	int i;
+	for(i=0;i<size;i++)
+	/*if (count[i] !=0)*/
+		printf("data = %c, element freq = %d\n",data[i], count[i]);
 
+	printf("about to build tree\n");
+	#endif
 	/* 	 Construct Huffman Tree  */
 	MinHeapNode_t* root = buildHuffmanTree(data, count, size); 
 		/*printf("frequency is %d\ndata is: %c\n",root->freq,root->data);
@@ -589,3 +881,23 @@ void HuffmanCodes(char data[], int count[], int size, Huffman_t tree[])
 	printCodes(root, str, top, size, tree, &row);
 	
 } 
+
+
+/*******************************************************************************
+ * This function Update
+ * inputs:
+ * - update
+ * outputs:
+ * - update
+*******************************************************************************/
+
+
+/*******************************************************************************
+ * This function Update
+ * inputs:
+ * - update
+ * outputs:
+ * - update
+*******************************************************************************/
+
+

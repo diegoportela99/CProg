@@ -6,40 +6,20 @@
 * Student IDs: 13234505, 12893602, 12616292, 13286378, 13372937
 * Description: ...
 *******************************************************************************/
-
-/*******************************************************************************
- * Header Files
- * 
- * I think we can remove these - Ray **UPDATE**
-*******************************************************************************/
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "btree.h"
 
 /*******************************************************************************
  * Constants
 *******************************************************************************/
 
+/* Maximum length for strings */
+#define MAX_STRING_LEN 256
+
 /*******************************************************************************
  * Structs
 *******************************************************************************/
 
-struct telemetry_point {
-	char[] location; /*the location of the substation*/
-	char[] desig;
-	char[] plant;
-	char[] network;
-	char[] quantity;
-	char[] protocol;
-	int number;
-	int address;
-	char[] moduletype;
-	int failed;
-	int online;
-	int faulty;
-	int oos; /* Out of service */
-} typedef struct telemetry_point telemetry_point_t;
+
 
 /*******************************************************************************
  * Function Prototypes
@@ -51,22 +31,24 @@ struct telemetry_point {
 
 /* Prints the start menu */
 void start_menu(void);
+/* Handles user input for start_menu */
+int start_menu_handler(root_t* root_p);
 /* Prints the file menu */
 void file_menu(void);
+/* Handles user input for file_menu */
+int file_menu_handler(root_t* root_p);
 /* Imports the data from csv and writes to database */
-void import_data(void);
+void import_csv(root_t* root_p);
 /* Loads the data from csv */
 void load_data(void);
 /* Prints the search menu */
-void search_data(void);
-/* Searches the csv by plant */
-void search_plant(void);
-/* Searches the csv by desig */
-void search_desig(void);
-/* Searches the csv by module */
-void search_module(void);
+void search_menu(void);
+/* Handles user input for search_menu */
+int search_menu_handler(root_t* root_p);
+/* Searches the csv */
+void search(root_t* root, int search_criteria);
 /* Exports the data as a csv */
-void export_csv(void);
+void export_csv(root_t* root_p);
 /* Exports the database file */
 void save_data(void);
 
