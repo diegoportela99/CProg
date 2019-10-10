@@ -142,8 +142,5 @@ void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tre
     traversing the built Huffman Tree  */
 void HuffmanCodes(char data[], int count[], int size, Huffman_t tree[]);
 
-void saveoutput(Huffman_t tree[], int size, int str_raw[]);
-
-
 /*EOF*/
 
