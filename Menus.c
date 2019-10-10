@@ -18,7 +18,7 @@
  * This functions prints the start menu
  * Developer: Michael Lardner
  * inputs:
- * - none
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - none
 *******************************************************************************/
@@ -47,11 +47,13 @@ void start_menu(int argc) {
  * This functions handles user input for the start menu
  * Developer: Michael Lardner
  * inputs:
- * - none
+ * - root_t* root_p - The root of the binary tree datastructure
+ * - int argc - The amount of runtime arguments
+ * - char* argv[] - String containing the runtime mode entered by the user
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int start_menu_handler(root_t* root_p, int argc) {
+int start_menu_handler(root_t* root_p, int argc, char* argv[]) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -61,7 +63,7 @@ int start_menu_handler(root_t* root_p, int argc) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-				import_csv(root_p);
+				import_csv(root_p, argc, argv);
 				break;
 			case 2 :
 			
@@ -98,9 +100,9 @@ int start_menu_handler(root_t* root_p, int argc) {
 
 /*******************************************************************************
  * This functions prints the file menu
- * Developer: Michael Lardner 12893602
+ * Developer: Michael Lardner
  * inputs:
- * - none
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - none
 *******************************************************************************/
@@ -127,9 +129,10 @@ void file_menu(int argc) {
 
 /*******************************************************************************
  * This functions handles user input for the file menu
- * Developer: Michael Lardner 12893602
+ * Developer: Michael Lardner
  * inputs:
- * - none
+ * - root_t* root_p - The root of the binary tree datastructure
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
@@ -169,9 +172,9 @@ int file_menu_handler(root_t* root_p, int argc) {
 
 /*******************************************************************************
  * This functions prints the search menu 
- * Developer: 
+ * Developer: Michael Lardner
  * inputs:
- * - none
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - none
 *******************************************************************************/
@@ -200,7 +203,8 @@ void search_menu(int argc) {
  * This functions handles user input for the search menu
  * Developer: Michael Lardner
  * inputs:
- * - none
+ * - root_t* root_p - The root of the binary tree datastructure
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
@@ -212,13 +216,13 @@ int search_menu_handler(root_t* root_p, int argc) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-				search(root_p, selection);
+				search(root_p, selection, argc);
 				break;
 			case 2 :
-				search(root_p, selection);
+				search(root_p, selection, argc);
 				break;
 			case 3 :
-				search(root_p, selection);
+				search(root_p, selection, argc);
 				break;	
 			case 4 :			
 				break;
@@ -241,7 +245,7 @@ int search_menu_handler(root_t* root_p, int argc) {
  * outputs:
  * - none
 *******************************************************************************/
-void compression_debug_menu(void) {
+void compression_debug_menu() {
 	printf("\n"
 	"\033[1;31m"
 	"COMPRESSION DEBUG MENU\n"
@@ -256,11 +260,12 @@ void compression_debug_menu(void) {
  * This functions handles user input for the compression debug menu
  * Developer: Michael Lardner
  * inputs:
- * - none
+ * - root_t* root_p - The root of the binary tree datastructure
+ * - int argc - The amount of runtime arguments
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
-int compression_debug_menu_handler(root_t* root_p, int argc) {
+int compression_debug_menu_handler(root_t* root_p, int argc, char* argv[]) {
 	char input[MAX_STRING_LEN];
 	fgets(input, MAX_STRING_LEN, stdin);
 	int selection;
@@ -268,7 +273,7 @@ int compression_debug_menu_handler(root_t* root_p, int argc) {
 	if (selection != 0) {
 		switch(selection) {
 			case 1 :
-				import_csv(root_p);
+				import_csv(root_p, argc, argv);
 				break;
 			case 2 :
 				Compression(root_p);
@@ -288,12 +293,12 @@ int compression_debug_menu_handler(root_t* root_p, int argc) {
 }
 
 /*******************************************************************************
- * This functions handles user input for the start menu
+ * This functions handles user input for the colour menu
  * Developer: Michael Lardner
  * inputs:
  * - none
  * outputs:
- * - int selection - Integer of the users selection
+ * - none
 *******************************************************************************/
 void colour_menu(void) {
 		printf("\n"

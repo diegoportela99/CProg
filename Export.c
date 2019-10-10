@@ -17,7 +17,7 @@
  * This functions exports the current database as a csv file
  * Developer: Michael Lardner
  * inputs:
- * - none
+ * - root_t* root_p - The root of the binary tree datastructure
  * outputs:
  * - int selection - Integer of the users selection
 *******************************************************************************/
@@ -33,6 +33,7 @@ void export_csv(root_t* root_p) {
         strcat(filename, ".csv");
         FILE * substation_database;
         substation_database = fopen(filename, "w");
+        /* Loops over all the entries in the database */
         for (loopVar = 0; loopVar < (*root_p).number_of_entries-1; loopVar++) {
             /* Gets the data point at the specified index */
             telemetry_point_t* current = get_telemetry_point(loopVar, root_p);
@@ -62,8 +63,3 @@ void export_csv(root_t* root_p) {
     }
 }
 
-/*
-void save_data(void) {
-
-}
-*/

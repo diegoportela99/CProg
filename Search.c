@@ -17,14 +17,15 @@
 
 void print_telemetry_point(telemetry_point_t* telemetry_point);
 
-void print_search_header();
+void print_search_header(int argc);
 
-void search_btree(root_t* root, int search_criteria, char search_string[]);
+void search_btree(root_t* root, int search_criteria, char search_string[],
+int argc);
 
 /*******************************************************************************
  * Function definitions
 *******************************************************************************/
-void search(root_t* root_p, int search_criteria) {
+void search(root_t* root_p, int search_criteria, int argc) {
     char search_type[3][7] = {"plant","desig","module"};
     char user_input[BUFSIZ];
     char search_string[BUFSIZ];
@@ -32,7 +33,7 @@ void search(root_t* root_p, int search_criteria) {
     printf("Please enter %s: ", search_type[search_criteria-1]);
     fgets(user_input, BUFSIZ, stdin);
     sscanf(user_input,"%[^\n]",search_string);
-    search_btree(root_p,search_criteria-1,search_string);
+    search_btree(root_p,search_criteria-1,search_string, argc);
 }
 
 void print_telemetry_point(telemetry_point_t* telemetry_point) {
@@ -54,18 +55,24 @@ void print_telemetry_point(telemetry_point_t* telemetry_point) {
     );
 }
 
-void print_search_header() {
-    printf(TEXTRED(0));
+void print_search_header(int argc) {
+    /* Checks if the user is in a colour mode */
+    if (argc <= 1) {
+        printf(TEXTRED(0));
+    }
     printf("                                                                  "
     "                                  F|O|F|O\n");
     printf("                                                                  "
         "                                  A|N|A|O\n");
     printf(" Location|    Desig|               Plant|Network|"
     "                    Quantity|Prot| #|Addrs| Module|I|L|U|S\n");
-    printf(TEXTDEFAULT);
+    if (argc <= 1) {
+       printf(TEXTDEFAULT); 
+    }
 }
 
-void search_btree(root_t* root, int search_criteria, char search_string[]) {
+void search_btree(root_t* root, int search_criteria, char search_string[],
+int argc) {
     int i,j=0; /* Iterators */
 
     for(i=0; i<(*root).number_of_entries; i++) {
@@ -74,21 +81,21 @@ void search_btree(root_t* root, int search_criteria, char search_string[]) {
         {
         case 0:
             if(strcmp((*tel_p).plant,search_string)==0) {
-                if(j==0) {print_search_header();}
+                if(j==0) {print_search_header(argc);}
                 print_telemetry_point(tel_p);
                 j++;
             }
             break;
         case 1:
             if(strcmp((*tel_p).desig,search_string)==0) {
-                if(j==0) {print_search_header();}
+                if(j==0) {print_search_header(argc);}
                 print_telemetry_point(tel_p);
                 j++;
             }
             break;
         case 2:
             if(strcmp((*tel_p).moduletype,search_string)==0) {
-                if(j==0) {print_search_header();}
+                if(j==0) {print_search_header(argc);}
                 print_telemetry_point(tel_p);
                 j++;
             }
