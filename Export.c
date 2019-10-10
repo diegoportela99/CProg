@@ -33,6 +33,9 @@ void export_csv(root_t* root_p) {
         strcat(filename, ".csv");
         FILE * substation_database;
         substation_database = fopen(filename, "w");
+        fprintf(substation_database, "Location,Desig,Plant,Network,Quantity,"
+            "Protocol,Number,Address,ModuleType,Failed,Online,Faulty,Oos,\n");
+
         /* Loops over all the entries in the database */
         for (loopVar = 0; loopVar < (*root_p).number_of_entries-1; loopVar++) {
             /* Gets the data point at the specified index */

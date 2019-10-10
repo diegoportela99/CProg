@@ -115,6 +115,12 @@ void import_csv(root_t* root_p, int argc, char* argv[]) {
                 #endif
                 rewind(substation_database);
 
+                /* Removes the header line of the csv because we don't want
+                it now we've checked it's right. That mean's the file is
+                shorter so loopVar is decrimented. */
+                fgets(buffer,MAX_STRING_LEN,substation_database);
+                loopVar--;
+
                 while (loopVar > 0) {
                     char buffer[MAX_STRING_LEN*10];
                     /* Strings of all the variable types in a valid csv file

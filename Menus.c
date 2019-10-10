@@ -66,7 +66,12 @@ int start_menu_handler(root_t* root_p, int argc, char* argv[]) {
 				import_csv(root_p, argc, argv);
 				break;
 			case 2 :
-			
+				if(root_p->number_of_entries>0) {
+					printf("Error: Data already present.\n");
+					break;
+				} 
+				*(root_p) = *(create_root());
+				load_from_db(root_p);
 				break;
 			case 3 :
 				do {
@@ -155,7 +160,8 @@ int file_menu_handler(root_t* root_p, int argc) {
 				export_csv(root_p);
 				break;
 			case 3 :
-				
+				save_to_db(root_p);
+				*(root_p) = *(create_root());
 				break;	
 			case 4 :			
 				break;

@@ -47,7 +47,7 @@ int import_menu_handler(root_t* root_p, char* argv[]);
 /* Imports the data from csv and writes to database */
 void import_csv(root_t* root_p, int argc, char* argv[]);
 /* Loads the data from csv */
-void load_data(void);
+void load_from_db(root_t* root_p);
 /* Prints the search menu */
 void search_menu(int argc);
 /* Handles user input for search_menu */
@@ -57,7 +57,9 @@ void search(root_t* root_p, int search_criteria, int argc);
 /* Exports the data as a csv */
 void export_csv(root_t* root_p);
 /* Exports the database file */
-void save_data(void);
-
+void save_to_db(root_t* root_p);
+/* Prints a telemetry point with formatting. Used for debug in loadsave.c,
+as well as in Search.c */
+void print_telemetry_point(telemetry_point_t* telemetry_point);
 #endif
 

@@ -2,6 +2,11 @@
 #include <string.h>
 #include "debug.h"
 #include "btree.h"
+
+/* FUNCTION PROTOTYPES */
+
+void delete_telemetry_point(telemetry_point_t* tp_p);
+
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
@@ -19,6 +24,7 @@ root_t* create_root() {
 *******************************************************************************/
 btree_t* create_b_tree(btree_t* parent){
     btree_t* new_b_tree = (btree_t*)malloc(sizeof(btree_t));
+    (*new_b_tree).data_p = NULL;
     (*new_b_tree).l = NULL;
     (*new_b_tree).r = NULL;
     (*new_b_tree).p = parent;
@@ -67,6 +73,24 @@ telemetry_point_t* create_telemetry_point(
 return(t_p_p);
 }
 
+void delete_telemetry_point(telemetry_point_t* tp_p) {
+    if(tp_p!=NULL) {
+        if(tp_p->desig!=NULL) {free(tp_p->desig);}
+        if(tp_p->failed!=NULL) {free(tp_p->failed);}
+        if(tp_p->faulty!=NULL) {free(tp_p->faulty);}
+        if(tp_p->location!=NULL) {free(tp_p->location);}
+        if(tp_p->moduletype!=NULL) {free(tp_p->moduletype);}
+        if(tp_p->network!=NULL) {free(tp_p->network);}
+        if(tp_p->number!=NULL) {free(tp_p->number);}
+        if(tp_p->online!=NULL) {free(tp_p->online);}
+        if(tp_p->oos!=NULL) {free(tp_p->oos);}
+        if(tp_p->plant!=NULL) {free(tp_p->plant);}
+        if(tp_p->protocol!=NULL) {free(tp_p->protocol);}
+        if(tp_p->quantity!=NULL) {free(tp_p->quantity);}
+        free(tp_p);
+    }
+}
+
 telemetry_point_t* get_telemetry_point(unsigned int index, root_t* root) {
     btree_t* current_node_p = (*root).root;
     #ifdef DETAILEDDEBUG
@@ -103,18 +127,19 @@ void add_telemetry_point(unsigned int index, root_t* root,
 }
 
 void delete_datastructure(root_t* root) {
+    printf("Deleting datastructure\n");
     btree_t* current_node_p = (*root).root;
     btree_t* next_node_p;
     int exit = 0;
     while (!exit) {
-        if((*current_node_p).l) {
+        if((*current_node_p).l!=NULL) {
             #ifdef DEBUG
                 printf("Branching left\n");
             #endif
             current_node_p = (*current_node_p).l;
             
         }
-        else if((*current_node_p).r) {
+        else if((*current_node_p).r!=NULL) {
             #ifdef DEBUG
                 printf("Branching right\n");
             #endif
@@ -125,15 +150,17 @@ void delete_datastructure(root_t* root) {
             #ifdef DEBUG
                 printf("Deleting node\n");
             #endif
-            if((*current_node_p).data_p) {
-                free((*current_node_p).data_p);
+            if((*current_node_p).data_p!=NULL) {
+                #ifdef DEBUG
+                    printf("Deleting telemetry point\n");
+                #endif
+                delete_telemetry_point((*current_node_p).data_p);
             }
             if(current_node_p == (*root).root) {
                 #ifdef DEBUG
                     printf("Freeing root, all branches handled.\n");
                 #endif
                 free(current_node_p);
-                free(root);
                 exit = 1;
             }
             if(!exit) {

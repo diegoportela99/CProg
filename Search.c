@@ -13,32 +13,35 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-
-void print_telemetry_point(telemetry_point_t* telemetry_point);
-
-void print_search_header(int argc);
+#include "Substation.h"
 
 void search_btree(root_t* root, int search_criteria, char search_string[],
 int argc);
+
+void print_search_header(int argc);
 
 /*******************************************************************************
  * Function definitions
 *******************************************************************************/
 void search(root_t* root_p, int search_criteria, int argc) {
+    if(root_p->number_of_entries == 0) {
+        printf("Please load data before attempting to search.\n");
+        return;
+    }
+
     char search_type[3][7] = {"plant","desig","module"};
     char user_input[BUFSIZ];
     char search_string[BUFSIZ];
 
     printf("Please enter %s: ", search_type[search_criteria-1]);
     fgets(user_input, BUFSIZ, stdin);
-    sscanf(user_input,"%[^\n]",search_string);
+    sscanf(user_input," %s ",search_string);
     search_btree(root_p,search_criteria-1,search_string, argc);
 }
 
 void print_telemetry_point(telemetry_point_t* telemetry_point) {
 	printf (
-    "%9s|%9s|%20s|%7s|%28s|%4s|%2s|%5s|%7s|%1s|%1s|%1s|%1s\n",
+    "%9s|%18s|%22s|%14s|%28s|%4s|%2s|%5s|%7s|%1s|%1s|%1s|%1s\n",
     (*telemetry_point).location,
 	(*telemetry_point).desig,
 	(*telemetry_point).plant,
@@ -61,10 +64,10 @@ void print_search_header(int argc) {
         printf(TEXTRED(0));
     }
     printf("                                                                  "
-    "                                  F|O|F|O\n");
+    "                                                    F|O|F|O\n");
     printf("                                                                  "
-        "                                  A|N|A|O\n");
-    printf(" Location|    Desig|               Plant|Network|"
+        "                                                    A|N|A|O\n");
+    printf(" Location|             Desig|                 Plant|       Network|"
     "                    Quantity|Prot| #|Addrs| Module|I|L|U|S\n");
     if (argc <= 1) {
        printf(TEXTDEFAULT); 

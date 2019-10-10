@@ -7,7 +7,7 @@
 #include <stdio.h> /* Used for printf */
 
 /* If defined, activates debug features */
-/*#define DEBUG */
+/*#define DEBUG*/
 
 /* If defined, adds extra debug features
 #define DETAILEDDEBUG */
