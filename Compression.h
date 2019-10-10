@@ -76,7 +76,7 @@ struct Huffman {
 	int data; 
 
 /*	 The Huffman code of character  */
-	int Huffman_Code[MAX_TREE_HT] ; 
+	char Huffman_Code[MAX_TREE_HT] ; 
 
 	/* Size of Huffman code */
 	int size ;
@@ -93,38 +93,38 @@ typedef struct Huffman Huffman_t;
 carry out more specific functions  */
 void Compression (root_t* root_p);
 
-/*  A utility function allocate a new  min heap node with given character 
+/*  function allocate a new  min heap node with given character 
  and frequency of the character  */
 MinHeapNode_t* newNode(char data, unsigned freq) ;
 
-/*  A utility function to create a min heap of given capacity  */
+/*  function to create a min heap of given capacity  */
 struct MinHeap* createMinHeap(unsigned capacity);
 
-/*  A utility function to swap two min heap nodes  */
+/*  function to swap two min heap nodes  */
 void swapMinHeapNode(MinHeapNode_t** a, MinHeapNode_t** b) ;
 
 /*  The standard minHeapify function.  */
 void minHeapify(struct MinHeap* minHeap, int idx); 
 
-/*  A utility function to check  if size of heap is 1 or not  */
+/*  function to check  if size of heap is 1 or not  */
 int isSizeOne(struct MinHeap* minHeap); 
 
-/*  A standard function to extract  minimum value node from heap  */
+/*  function to extract  minimum value node from heap  */
 MinHeapNode_t* extractMin(MinHeap_t* minHeap) ;
 
-/* A utility function to insert  a new node to Min Heap  */
+/* function to insert  a new node to Min Heap  */
 void insertMinHeap(MinHeap_t* minHeap, MinHeapNode_t* MinHeapNode_t);
 
 /*  A standard function to build min heap  */
 void buildMinHeap(struct MinHeap* minHeap); 
 
-/*  A utility function to print an array of size n  */
-Huffman_t printArr(int str[], int n, int freq,char data);
+/*  function to print an array of size n  */
+Huffman_t printArr(const int str[], const int n,const int freq,const char data) ;
 
-/*  A utility function to store Huffman codes  */
-Huffman_t write_Huff_array(int code[], int n, int ASCII, int freq);
+/*  function to store Huffman codes  */
+Huffman_t write_Huff_array(const int code[], const int n, const int ASCII, const int freq);
 
-/* Utility function to check if this node is leaf  */
+/* function to check if this node is leaf  */
 int isLeaf(MinHeapNode_t* root);
 
 /*  Creates a min heap of capacity equal to size and inserts all character of 
@@ -136,11 +136,13 @@ MinHeapNode_t* buildHuffmanTree(char data[], int freq[], int size);
 
 /*  Prints huffman codes from the root of Huffman Tree. 
  	It uses str[] to store codes  */
-void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tree[], int* row);
+void printCodes(MinHeapNode_t* root, int str[], int top, int size, Huffman_t tree[],int* row);
 
 /*  The main function that builds a Huffman Tree and print codes by
     traversing the built Huffman Tree  */
 void HuffmanCodes(char data[], int count[], int size, Huffman_t tree[]);
+
+void saveoutput(Huffman_t tree[], int size, int str_raw[]);
 
 
 /*EOF*/
