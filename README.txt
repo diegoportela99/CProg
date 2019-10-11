@@ -55,6 +55,16 @@ as an encrypted database file. To exit the program, simply
 return to the main menu, from which there is an exit program
 option.
 
+The search function is designed for a group of people who already
+have a strong grasp of the dataset, and are looking for specific 
+data with knowledge of what to search by. For those who the dataset isn't
+so familiar to, some good example searches include:
+By plant: Cb
+By desig: L505
+By module: fpm 301
+To test further, I suggest you start with those searches and find other
+datapoints to search by within the data returned.
+
 There are also a few alternative runtime modes available:
 
 Typing "./SSD.out -c" will bring you to the compression debug

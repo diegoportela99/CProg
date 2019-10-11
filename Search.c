@@ -48,7 +48,7 @@ void search(root_t* root_p, int search_criteria, int argc) {
 
     printf("Please enter %s: ", search_type[search_criteria-1]);
     fgets(user_input, BUFSIZ, stdin);
-    sscanf(user_input," %s ",search_string);
+    sscanf(user_input,"%[^\n]",search_string);
     search_btree(root_p,search_criteria-1,search_string, argc);
 }
 
