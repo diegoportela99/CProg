@@ -27,7 +27,7 @@ btree.o : btree.c btree.h debug.h
 debug.o : debug.c debug.h
 	$(CC) $(CCFLAGS) -c -o debug.o debug.c
 
-Compression.o : Compression.c Substation.h btree.h btree.o Compression.h
+Compression.o : Compression.c Substation.h btree.h btree.o Compression.h debug.o
 	$(CC) $(CCFLAGS) -c -o Compression.o Compression.c
 
 loadsave.o : loadsave.c crypto.o chunk.o block.o debug.o btree.o Substation.h Search.o
@@ -43,5 +43,5 @@ block.o : block.c block.h btree.o debug.o
 	$(CC) $(CCFLAGS) -c -o block.o block.c
 
 clean:
-	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o Compression.o debug.o loadsave.o crypto.o chunk.o block.o
+	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o Compression.o debug.o loadsave.o crypto.o chunk.o block.o database.ssdb key
 	

@@ -10,10 +10,15 @@
 /*#define DEBUG*/
 
 /* If defined, adds extra debug features
-#define DETAILEDDEBUG */
+/*#define DETAILEDDEBUG */
 
-/* If defined adds visualizations of relevant features
-#define GRAPHICALDEBUG */
+/* If defined adds visualizations of Wolfram's Rule 30 in cryptography
+/*#define GRAPHICALDEBUG */
+
+/* This debug mode helps make memory issues visible by removing the random
+key generation. However, it also effectively turns off cryptography, thus the
+name. Do not leave this running. */
+/* #define EVILDEBUG */
 
 /* This string is printed to set terminal text to default */
 #define TEXTDEFAULT "\033[0m"
@@ -26,6 +31,4 @@
    bold, 0 means normal. */
 #define TEXTBLUE(x) "\033["#x";34m"
 
-void print_section_title(char* string);
-void print_title(char* string);
-void print_header(char* string);
+void print_title(char* string, int argc);

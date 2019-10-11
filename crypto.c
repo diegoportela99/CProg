@@ -1,4 +1,5 @@
 /*******************************************************************************
+ * CRYPTO.C
  * WOLFRAM'S RULE-30 BASED BLOCK CIPHER
  * Name: Owen Dowley
  * Student ID: 13234505
@@ -22,20 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "crypto.h"
-
-/* This adds debug features */
-/*#define DEBUG*/
-
-/* This adds extra debug features 
-#define DETAILEDDEBUG */
-
-/* This debug mode helps make memory issues visible by removing the random
-key generation. However, it also effectively turns off crypto, thus the
-name. */
-/* #define EVILDEBUG */
-
-/* This adds visualizations of the application of Wolfram's rule 30
-#define GRAPHICALDEBUG */
+#include "debug.h"
 
 /* Database name */
 #define DBNAME "database.ssdb"
@@ -47,11 +35,11 @@ name. */
 #define URANDOM "/dev/urandom"
 
 /* Defines a modulus which behaves correctly for negative values (unlike  "%").
-   Mathematically, negative inputs to mod should wrap round to positive. 
-   NOTE: Does not work for x < -y. */
+Mathematically, negative inputs to mod should wrap round to positive. 
+NOTE: Does not work for x < -y. */
 #define MOD(x,y) ((((x)%(y))+(y))%(y)) 
 
-/* Selects the rightmost 8 bytes of a 16 byte int */
+/* Selects the rightmost 4 bytes of an unsigned long long int */
 #define EIGHTLOWMASK 0xFFFFFFFF
 
 /* The number of blocks of key material. */
@@ -64,31 +52,18 @@ name. */
 #define NUMBER_OF_KEYS 32
 
 /* The number of cycles of Wolfram's Rule 30 applied in the F function. Could
-   be as low as 1, but higher numbers cause greater non-linearity. */
+be as low as 1, but higher numbers cause greater non-linearity, which is a 
+cryptographically desirable property. */
 #define WOLFRAMCYCLES 5
-
-/* This string is printed to set terminal text to default */
-#define TEXTDEFAULT "\033[0m"
-
-/* This string is printed to set terminal text to red. x is a boolean: 1 means 
-   bold, 0 means normal. */
-#define TEXTRED(x) "\033["#x";31m"
-
-/* This string is printed to set terminal text to blue. x is a boolean: 1 means 
-   bold, 0 means normal. */
-#define TEXTBLUE(x) "\033["#x";34m"
-
-/* Used to pad titles in debug mode */
-#define TITLE "===================="
 
 /*******************************************************************************
  * Structure Definitions
 *******************************************************************************/
 
 /* This structure holds a 'cycle' of keys - all the keys needed to encrypt a
-   single block of ciphertext. In addition, it holds a pointer to the previous
-   key cycle - needed in decryption to iterate backwards through key cycles, but
-   also needed for deallocation of memory. */
+single block of ciphertext. In addition, it holds a pointer to the previous key 
+cycle - needed in decryption to iterate backwards through key cycles, but also 
+needed for the deallocation of memory. */
 struct key_cycle {
     /* The sections of key used for key whitening */
     unsigned long long wkey[NUMBER_OF_WKEYS]; 
@@ -97,7 +72,7 @@ struct key_cycle {
     unsigned long long key[NUMBER_OF_KEYS]; 
     
     /* Pointer to previous key cycle. Needed to iterate backwards through key
-       cycles for decryption */
+    cycles for decryption */
     struct key_cycle* previous_key_cycle_p; 
 };
 typedef struct key_cycle key_cycle_t;
@@ -115,34 +90,37 @@ key_cycle_t* key_schedule(key_cycle_t* previous_key_cycle_p);
 void free_key_cycles(key_cycle_t* key_cycle_p);
 
 /* Saves the encrypted text to a file, with an integer header which is the
-   number of blocks of ciphertext saved. */
+number of blocks of ciphertext saved. */
 int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks);
 
-/* Loads an encrypted file into memory */
+/* Loads an encrypted file into memory as ciphertext */
 unsigned long long* load_ciphertext(int number_of_blocks);
 
 /* The core encryption scheme is a feistel network. It takes a block and key 
-   material, and either encryts or decrypts the block */
+material, and either encryts or decrypts the block */
 unsigned long long feistel_network(unsigned long long plaintext,key_cycle_t key,
     int encrypt);
 
-/* Also known as a "round function", the heart of a feistel cipher. Takes a 
-   block of plaintext, performs pseudo-random number generation with
-   it as the seed, and then XORs in the key. Is strongly non-linear. */
+/* Also known as a "round function", the heart of a feistel cipher. This 
+specific F function takes a block of plaintext, XORs in the key material, and
+then performs pseudo-random number generation with it as the seed.
+Is strongly non-linear. */
 unsigned long f_function(unsigned long plaintext, unsigned long key);
 
-/* Performs the pseudo-random number generation used in the F-function. */
+/* Performs the pseudo-random number generation used in the F-function, using
+the cellular automata defined by Wolfram's Rule 30 */
 unsigned long wolframs_rule_30(unsigned long plaintext);
 
 /* Cryptographically Secure Pseudo-Random Number Generator. Generates a key 
-   from system randomness provided in /dev/urandom. Is Linux system dependent.*/
+from system randomness provided in /dev/urandom. Is Linux system dependent. */
 unsigned long long csprng();
 
 /* Saves the key to a file, or loads it from one. */
 int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save);
 
 #ifdef GRAPHICALDEBUG
-    /* Graphs Wolfram's rule 30 */
+    /* Graphs Wolfram's rule 30 for debug purposes. If functioning correctly,
+    triangular patterns should be visable. */
     void graph_rule_30(unsigned long row);
 #endif
 
@@ -153,7 +131,7 @@ int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save);
  * inputs:
  * - key[] | The array of key material used to initialize the key cycle
  * outputs:
- * - key_cycle_p | A pointer to the initialized key_cycle_p. 
+ * - key_cycle_t* | A pointer to the initialized key_cycle_p. 
  * /////////////////////////// MEMORY WARNING //////////////////////////////////
  * This function calls malloc, and returns a pointer to the allocated memory! 
  * Functions which use init_key_cycle() are responsible for calling the
@@ -212,7 +190,7 @@ key_cycle_t* init_key_cycle(unsigned long long key[]) {
  * inputs:
  * - previous_key_cycle_p | A pointer to the previous key cycle
  * outputs:
- * - key_cycle_p | A pointer to the new key cycle 
+ * - key_cycle_t* | A pointer to the new key cycle 
  * /////////////////////////// MEMORY WARNING //////////////////////////////////
  * This function calls malloc, and returns a pointer to the allocated memory! 
  * Functions which use init_key_cycle() are responsible for calling the 
@@ -239,6 +217,14 @@ key_cycle_t* key_schedule(key_cycle_t* previous_key_cycle_p) {
     return(key_cycle_p);
 }
 
+/******************************************************************************* 
+ * This function frees a keycycle and all previous key cycles from it. Call when
+ * done with key material.
+ * inputs:
+ * - key_cycle_p | A pointer to the last key cycle of the key cycles to be freed
+ * outputs:
+ * - none
+*******************************************************************************/
 void free_key_cycles(key_cycle_t* key_cycle_p) {
     
     /* Used to keep us from losing the pointer to the previous key cycle when
@@ -252,7 +238,7 @@ void free_key_cycles(key_cycle_t* key_cycle_p) {
         printf(TEXTDEFAULT);
     #endif
 
-    /* Frees the key_cycles created for encryption */
+    /* Frees key_cycles while there are more key cycles to free */
     while(key_cycle_p != NULL) {
         #ifdef DEBUG
             free_n++;
@@ -278,12 +264,6 @@ void free_key_cycles(key_cycle_t* key_cycle_p) {
 *******************************************************************************/
 int encrypt(unsigned long long plaintext[], int number_of_blocks) {
     
-    #ifdef DEBUG
-        printf(TEXTRED(1));
-        printf("\n"TITLE"ENCRYTPING"TITLE"\n");
-        printf(TEXTDEFAULT);
-    #endif
-
     int i; /* iterator */
     unsigned long long key[NUMBER_OF_KEY_BLOCKS];
     
@@ -331,18 +311,19 @@ int encrypt(unsigned long long plaintext[], int number_of_blocks) {
 }
 
 /*******************************************************************************
- * Decrypt
+ * This function decrypts an array of blocks of ciphertext from a file, and 
+ * outputs the resulting plaintext.
+ * inputs:
+ * - plaintext_p | A pointer to a location where plaintext will be stored.
+ * outputs:
+ * - 1 or 0 | Has encrytion succeeded ? 1 : 0
+ * - *(plaintext_p) is filled with the plaintext
 *******************************************************************************/
 int decrypt(unsigned long long* plaintext_p) {
-    
-    #ifdef DEBUG
-        printf(TEXTBLUE(1));
-        printf("\n"TITLE"DECRYTPING"TITLE"\n");
-        printf(TEXTDEFAULT);
-    #endif
 
     unsigned long long key[NUMBER_OF_KEY_BLOCKS];
 
+    /* Get key material from file */
     file_handle_key(key,0);
 
     /* We need to hang onto the last generated key_cycle_p so we can hand it
@@ -351,20 +332,26 @@ int decrypt(unsigned long long* plaintext_p) {
 
     int cipherBlocks,i;
     unsigned long long* ciphertext_p = NULL;
-    if(plaintext_p == NULL) {
-        printf("AAHH NULL POINTER DEBUG");
-    }
 
+    /* Read the number of blocks of ciphertext. */
     cipherBlocks = read_header();
     if(!cipherBlocks) {
         printf("Loading ciphertext failed\n");
         return(0);
     }
 
+    /* Load ciphertext into memory */
     ciphertext_p = load_ciphertext(cipherBlocks);
-    
+    if(!ciphertext_p) {
+        printf("Loading ciphertext failed\n");
+        return(0);
+    }
+
+    /* Generate a key cycle */
     key_cycle_t* key_cycle_p = init_key_cycle(key);
     
+    /* Preschedule the number of keys needed so we can iterate backwards
+    through them */
     for(i=0;i<cipherBlocks; i++) {
         key_cycle_p = key_schedule(key_cycle_p);
                 #ifdef DETAILEDDEBUG
@@ -375,8 +362,11 @@ int decrypt(unsigned long long* plaintext_p) {
         #endif
     }
 
+    /* Hold onto the last keycycle  */
     last_key_cycle_p = key_cycle_p;
 
+    /* Iterate backwards through the cipherblocks, decrypting them each with
+    the appropriate key */
     for(i=cipherBlocks-1;i>=0;i--) {
         *(plaintext_p+i) = feistel_network(
             *(ciphertext_p+i),*key_cycle_p,0);  
@@ -392,16 +382,21 @@ int decrypt(unsigned long long* plaintext_p) {
         }
     #endif
 
+    /* Clean up used memory */
     free(ciphertext_p);
     ciphertext_p = NULL;
-
     free_key_cycles(last_key_cycle_p);
     
     return(1);
 }
 
 /*******************************************************************************
- * Save Ciphertext
+ * This function saves a block of ciphertext to a file (database.ssdb).
+ * inputs:
+ * - ciphertext_p | A pointer to a location where ciphertext is stored
+ * - number_of_blocks | The number of blocks in ciphertext_p
+ * outputs:
+ * - 1 or 0 | Has saving succeeded ? 1 : 0
 *******************************************************************************/
 int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks) {
     int i; /* iterator */
@@ -420,9 +415,10 @@ int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks) {
     #endif
 
     /* Add a header that is the number of 64 bit blocks in the encrypted file.
-       This is used to check we have a complete file when loading. */
+    This is used to allocate size when loading. */
     fwrite(&number_of_blocks,sizeof(number_of_blocks),1,fp);
 
+    /* Write all the blocks stored in memory to file. */
     for(i=0;i<number_of_blocks;i++) {
         fwrite((savetext_p+i),sizeof(*(savetext_p+i)),1,fp);
         #ifdef DEBUG 
@@ -430,21 +426,28 @@ int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks) {
         #endif
     }
 
+    /* Close file, clean up file pointer */
     fclose(fp);
     fp = NULL;
     return(1);
 }
 
 /*******************************************************************************
- * Read header
+ * This function reads the header of a database file (database.ssdb).
+ * inputs:
+ * - none
+ * outputs:
+ * - size or 0 | Has saving succeeded ? size of file (in encrypted blocks) : 0
 *******************************************************************************/
 int read_header() {
-    int header_val;
+    int header_val; /* Value of header */
     FILE* fp = fopen(DBNAME, "rb");
     /* Check we succeed in opening the file */
     if(fp == NULL) {
         return(0);
     }
+
+    /* Read the header from the file */
     fread(&header_val,sizeof(int),1,fp);
     #ifdef DETAILEDDEBUG
         printf("Header value: %d\n", header_val);
@@ -455,11 +458,15 @@ int read_header() {
 }
 
 /*******************************************************************************
- * Load Ciphertext
+ * This function loads ciphertext from a file and returns it.
+ * inputs:
+ * - number_of_blocks | The integer number of blocks to be read
+ * outputs
+ * -unsigned long long* | A pointer to the blocks loaded
 *******************************************************************************/
 unsigned long long* load_ciphertext(int number_of_blocks) {
-    int i;
-    unsigned long long buffer;
+    int i; /* Iterator */
+    unsigned long long buffer; /* Buffer for fread */
 
     #ifdef DEBUG
         printf(TEXTRED(0));
@@ -474,12 +481,15 @@ unsigned long long* load_ciphertext(int number_of_blocks) {
     }
     fseek(fp,sizeof(int),SEEK_SET);
 
+    /* Allocate a block of memory of the right size to hold the number of
+    blocks being loaded */
     unsigned long long* ciphertext_p = (unsigned long long*)malloc(sizeof
         (unsigned long long)*number_of_blocks);
     if(ciphertext_p == NULL) {
         printf("Error: malloc failed");
     }
 
+    /* Read the blocks into the memory of ciphertext_p */
     for(i = 0; i<number_of_blocks;i++) {
         fread(&buffer,sizeof(buffer),1,fp);
         *(ciphertext_p+i) = buffer;
@@ -491,13 +501,23 @@ unsigned long long* load_ciphertext(int number_of_blocks) {
     return(ciphertext_p);
 }
 /*******************************************************************************
- * Feistel Network
+ * This function impliments the Feistel Network encryption structure used. This
+ * structure is reversed by application backwards, which is controlled by the
+ * "encrypt" flag. This function uses terminology consistent with encryption:
+ * i.e, plaintext is input, ciphertext is output. In decryption
+ * mode these actually behave as if reversed.
+ * inputs:
+ * - plaintext | An unsigned long long containing the binary plaintext to be 
+ *      encrypted (or the binary ciphertext to be decrypted)
+ * outputs:
+ * - ciphertext |  An unsigned long long containing the binary ciphertext 
+ *      encrypted (or the binary plaintext decrypted)
 *******************************************************************************/
-unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t keys,
-    int encrypt) {
+unsigned long long feistel_network(unsigned long long plaintext, 
+    key_cycle_t keys, int encrypt) {
     unsigned long s_bits; /* Used to swap r_bits and l_bits */
-    unsigned long l_bits = plaintext >> 32;
-    unsigned long r_bits = plaintext & EIGHTLOWMASK;
+    unsigned long l_bits = plaintext >> 32; /* The high 32 bits of the block */
+    unsigned long r_bits = plaintext & EIGHTLOWMASK; /* The low 32 bits */
     int i; /* iterator */
     
     /* A whole bunch of debug tooling is here */
@@ -515,8 +535,7 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
         #endif
     #endif
 
-
-    /* Input whitening */
+    /* Input whitening. Ternary operator used to select encrypt/decrypt modes */
     l_bits = l_bits ^ keys.wkey[encrypt ? 0:3];
     r_bits = r_bits ^ keys.wkey[encrypt ? 1:2];
 
@@ -528,12 +547,12 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
             #endif
             
             r_bits = f_function(l_bits,keys.key[encrypt ? i : 31-i])^r_bits;
-            /* Swap l_bits and r_bits */
             
             #ifdef DETAILEDDEBUG
                 printf("out: %8lx %8lx\n", l_bits, r_bits);
             #endif
             
+            /* Swap l_bits and r_bits */
             s_bits = l_bits;
             l_bits = r_bits;
             r_bits = s_bits;
@@ -543,39 +562,53 @@ unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t key
     l_bits = l_bits ^ keys.wkey[encrypt ? 2:1];
     r_bits = r_bits ^ keys.wkey[encrypt ? 3:0];
 
+    /* Recreate and return 64 bit block. Swap lbits and rbits while doing so */
     return((r_bits << 32) | l_bits);
     }
+
 /*******************************************************************************
- * F Function
+ * Applies the F function, creating a very non-linear output from a given input
+ * inputs:
+ * - plaintext | An unsigned long to be mangled
+ * - key | A second unsigned long to be used in the mangling
+ * outputs:
+ * - ciphertext | An unrecognisable mangling to the plaintext, but repeatably so
 *******************************************************************************/
 unsigned long f_function(unsigned long plaintext, unsigned long key) {
     /* XOR key material with the plaintext. Doing this before applying Wolfram's
-       Rule 30 increases the key 'diffusion' - the number of bits of ciphertext
-       affected by the change of one bit of key. According to Shannon's 
-       principles of cryptography, this is a key goal of strong ciphers.*/
-    unsigned long cryptotext = plaintext^key;
+    Rule 30 increases the key 'diffusion' - the number of bits of ciphertext
+    affected by the change of one bit of key. According to Shannon's 
+    principles of cryptography, this is a key goal of strong ciphers.*/
+    unsigned long ciphertext = plaintext^key;
     int i;
 
-    /* Applies Wolfram's Rule 30 to the ciphertext. Increasing the number of 
-       iterations here makes the F function less linear, increasing resistance 
-       to differential cryptanalysis. It also increases diffusion, in accordance
-       with Shannon's principles of cryptography. */
     #ifdef GRAPHICALDEBUG
         printf("Wolfram's Rule 30 executing:\n");
-        graph_rule_30(cryptotext);
+        graph_rule_30(ciphertext);
     #endif
+
+    /* Applies Wolfram's Rule 30 to the ciphertext. Increasing the number of 
+    iterations here makes the F function less linear, increasing resistance 
+    to differential cryptanalysis. It also increases diffusion. */
     for(i=0;i<WOLFRAMCYCLES;i++) {
-        cryptotext = wolframs_rule_30(cryptotext);
+        ciphertext = wolframs_rule_30(ciphertext);
         #ifdef GRAPHICALDEBUG
-            graph_rule_30(cryptotext);
+            graph_rule_30(ciphertext);
         #endif
     }
 
-    return(cryptotext);
+    return(ciphertext);
 }
 
 /*******************************************************************************
- * Wolfram's Rule 30
+ * Applies the cellular automata described by Wolfram's Rule 30 across a 32 cell
+ * domain. The rightmost and leftmost cell are treated as next to each other, 
+ * so the block "wraps".
+ * For more info on the rule itself: http://mathworld.wolfram.com/Rule30.html
+ * inputs:
+ * - plaintext | This unsigned long is used as the initial seed
+ * outputs:
+ * - ciphertext | The values of the cells after a number of generations
 *******************************************************************************/
 unsigned long wolframs_rule_30(unsigned long plaintext) {
 
@@ -594,33 +627,55 @@ unsigned long wolframs_rule_30(unsigned long plaintext) {
 
 /*******************************************************************************
  * Cryptographically Secure Pseudo-Random Number Generator
+ * This gets a random number from /dev/urandom, which gets entropy from system
+ * hardware. It is a cryptographically secure source of randomness suiitable for
+ * key generation.
+ * inputs:
+ * - none
+ * outputs:
+ * random | an unsigned long long integer which is as random as feasible.
 *******************************************************************************/
 unsigned long long csprng() {
     unsigned long long random; /* Storage for the pseudorandom number */
     
-    /* If in debug mode, print where we are in the code as a title */
+    /* If in EVILDEBUG mode, instead of a random number return zero. This
+    was needed for debugging, but is a REALLY BAD IDEA. It might look like it 
+    still works for encrpytion, but turning this mode on reduces the key domain
+    to have one value.
+    Do not use with EVILDEBUG on for anything other than debugging. */
     #ifdef EVILDEBUG
+        printf("EVILDEBUG IS ON! ENCRYPTION NON-FUNCTIONAL.\n");
         return(0ULL);
     #endif
-
 
     FILE* fp = fopen(URANDOM,"rb");
     /* Check we succeed in opening the file */
     if(fp == NULL) { 
         return(0);
     }
+    /* Read randomness */
     fread(&random, sizeof(unsigned long long), 1, fp);
     fclose(fp);
     return(random);
 };
 
-
 /*******************************************************************************
- * Saves key to a file
+ * This function saves a key to a file, and reads a key from a file. The keys
+ * are not encrypted, because that requires hardcoding keys somewhere else,
+ * which is bad practise. Do not email keys in the same email as a database file
+ * if you're aiming for security.
+ * inputs:
+ * - key[] | The key material to be saved, or memory to write key being loaded 
+ *         | into.
+ * - save | Whether the function saves or loads key material.
+ * outputs:
+ *  - int | Has the function suceeded ? 1 : 0
 *******************************************************************************/
 int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
     int i; /* Iterators */
-    unsigned long long keyArray[NUMBER_OF_KEY_BLOCKS] = {key[0],key[1],key[2],key[3]};
+    unsigned long long keyArray[NUMBER_OF_KEY_BLOCKS] = 
+        {key[0],key[1],key[2],key[3]};
+    
     FILE* fp = fopen(KEYNAME, save ? "wb":"rb");
     /* Check we succeed in opening the file */
     if(fp == NULL) { 
@@ -637,17 +692,18 @@ int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
         printf(TEXTDEFAULT);
     #endif
 
-    for(i=0;i<NUMBER_OF_KEY_BLOCKS; i++) {
-        /*keyArray[i] = key_muddle(keyArray[i]);*/
-        #ifdef EVILDEBUG
-            printf("%d: %llx\n",i+1,keyArray[i]);
-        #endif
-    }
     if(save) {
         fwrite(keyArray,sizeof(unsigned long long),4,fp);
     }
     fclose(fp);
 
+    /* Originally forgot this code, which loads key blocks. Worryingly,
+    it still worked without this so long as encrypt and decrpyt were called
+    close enough together. I think that what was happening was that so long
+    as C hadn't had time to clean up the memory assigned to the key array, when
+    decrypt called this function and was given uninitialized memory back, 
+    because the array it was going into had the same name the same block was
+    allocated, with the same values. */
     for(i=0;i<NUMBER_OF_KEY_BLOCKS;i++){
         key[i]=keyArray[i];
     }
@@ -655,13 +711,23 @@ int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
     return(1);
 }
 
+
+
 #ifdef GRAPHICALDEBUG
-/* Graphs Wolfram's rule 30 */
+/*******************************************************************************
+ * This function graph's Wolfram's Rule 30 in GRAPHICALDEBUG mode.
+ * inputs:
+ * - row | The binary values of a row of 32 cells
+ * outputs:
+ *  - none
+*******************************************************************************/
 void graph_rule_30(unsigned long row) {
     int i;
     printf("[");
     for(i=0;i<32;i++) {
-        printf("%c",(row)&1 ? '#' :' ');
+        /* Can't print a better block char than @ without unicode, which needs
+        other libraries */
+        printf("%c",(row)&1 ? '#':' ');
         row = row >> 1;
     }
     printf("]\n");

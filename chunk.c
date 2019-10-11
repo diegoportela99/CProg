@@ -57,7 +57,7 @@ void dechunk(root_t* root_p, block_t* block_p, int size) {
     int i; /* Iterator */
     
     #ifdef DETAILEDDEBUG
-        print_title("DECHUNKING:");
+        printf("DECHUNKING:\n");
         int j=0; 
     #endif
     while(block_p!=NULL) {

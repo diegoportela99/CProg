@@ -4,13 +4,11 @@
 #include "chunk.h"
 #include "Substation.h"
 
-void save_to_db(root_t* root_p) {
+void save_to_db(root_t* root_p, int argc) {
     if(root_p->number_of_entries<=0) {
         printf("Load data before trying to export.\n");
         return;
     }
-
-    print_title("Exporting to database...");
     int i; /* Iterator */
 
     #ifdef DEBUG
@@ -30,25 +28,25 @@ void save_to_db(root_t* root_p) {
     for(i=0;i<size;i++) {
         plaintext_p[i] = block_p->number;
         #ifdef DEBUG
-            printf("%016llx\n", plaintext[i]);
+            printf("%016llx\n", plaintext_p[i]);
         #endif
         block_p = block_p->previous;
     }
-
+    print_title("ENCRYTPING  DATA",argc);
     encrypt(plaintext_p,size);
     free(plaintext_p);
     delete_datastructure(root_p);
 }
 
-void load_from_db(root_t* root_p) {
-    print_title("Loading from database...");
+void load_from_db(root_t* root_p, int argc) {
     int i; /* Iterator */
-    printf("Reading header... ");
+    printf("\nReading database file header... \n");
     int size = read_header();
     printf("%d encrypted blocks found\n",size);
     unsigned long long* plaintextout_p = (unsigned long long*)malloc(sizeof(
         unsigned long long)*size);
     
+    print_title("DECRYTPING DATA", argc);
     decrypt(plaintextout_p);
 
     block_t* blockout_p = create_block(NULL);

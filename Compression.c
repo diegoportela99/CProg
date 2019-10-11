@@ -391,7 +391,7 @@ void buildMinHeap(struct MinHeap* minHeap)
  * - update
 *******************************************************************************/
 
-Huffman_t printArr(int str[], int n, int freq,char data) 
+Huffman_t printArr(const int str[], int n, int freq,char data) 
 { 
 	/*#ifdef DEBUG*/
 	int i=0; 
@@ -416,7 +416,7 @@ Huffman_t printArr(int str[], int n, int freq,char data)
  * - update
 *******************************************************************************/
 
-Huffman_t write_Huff_array(int code[], int n, int ASCII, int freq) 
+Huffman_t write_Huff_array(const int code[], int n, int ASCII, int freq) 
 { 
 	
 	Huffman_t code1;

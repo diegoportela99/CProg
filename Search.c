@@ -1,11 +1,9 @@
 /*******************************************************************************
-* Substation Systems Database Search functions
-* Menus
-* Developer: Michael Lardner
-* Student ID: 12893602
-* Description: This c file contains all of the required functions for handling
-* the substation systems database programs menus. Including printing and
-* user navigation.
+* Search functions
+* Developer: Owen Dowley, Michael Lardner
+* Student ID: 13234505, 12893602
+* Description: This file contains for searching the btree memory structure.
+* Functions required in top level from this file are prototyped in Substation.h
 *******************************************************************************/
 
 #include "btree.h"
@@ -15,6 +13,10 @@
 #include <stdlib.h>
 #include "Substation.h"
 
+/*******************************************************************************
+ * Function prototypes
+*******************************************************************************/
+
 void search_btree(root_t* root, int search_criteria, char search_string[],
 int argc);
 
@@ -22,6 +24,16 @@ void print_search_header(int argc);
 
 /*******************************************************************************
  * Function definitions
+*******************************************************************************/
+
+/******************************************************************************* 
+ * This function searches a root_p by a search criteria and an a
+ * inputs:
+ * - root_p | The root of the current memory structure
+ * - search criteria | which sort of search we're performing, int
+ * - argc | Argument, passed down from main
+ * outputs:
+ * - none
 *******************************************************************************/
 void search(root_t* root_p, int search_criteria, int argc) {
     if(root_p->number_of_entries == 0) {
