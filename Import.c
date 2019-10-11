@@ -9,6 +9,7 @@
 
 #include "Substation.h"
 #include "btree.h"
+#include "debug.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -152,14 +153,15 @@ void import_csv(root_t* root_p, int argc, char* argv[]) {
                     loopVar--;
                 }
             #ifdef DEBUG
-            printf("%d\n", root_p->number_of_entries);
+                printf("Number of entries: %d\n", root_p->number_of_entries);
             #endif
             printf("Read Success\n");
                 #ifdef DETAILEDDEBUG
                     int i;
                     printf("Reading memory");
                     for(i=0; i<((*root_p).number_of_entries);i++) {
-                        telemetry_point_t* t_pr_p = get_telemetry_point(i,root_p);
+                        telemetry_point_t* t_pr_p =
+                        get_telemetry_point(i,root_p);
                         printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
                          (*t_pr_p).location, (*t_pr_p).desig, (*t_pr_p).plant,
                             (*t_pr_p).network, (*t_pr_p).quantity,

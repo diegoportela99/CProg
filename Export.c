@@ -10,6 +10,7 @@
 
 #include "Substation.h"
 #include "btree.h"
+#include "debug.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -48,14 +49,15 @@ void export_csv(root_t* root_p) {
             (*current).number, (*current).address, (*current).moduletype,
             (*current).failed, (*current).online, (*current).faulty, 
             (*current).oos);
-            #ifdef DEBUG
-            printf("Loopvar: %d ", loopVar);
-            fprintf(textp, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", 
-            (*current).location, (*current).desig, (*current).plant,
-            (*current).network, (*current).quantity, (*current).protocol,
-            (*current).number, (*current).address, (*current).moduletype, 
-            (*current).failed, (*current).online, (*current).faulty, 
-            (*current).oos);
+            #ifdef DETAILEDDEBUG
+                printf("Loopvar: %d ", loopVar);
+                fprintf(substation_database, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,"
+                "%s,%s,%s\n", 
+                (*current).location, (*current).desig, (*current).plant,
+                (*current).network, (*current).quantity, (*current).protocol,
+                (*current).number, (*current).address, (*current).moduletype, 
+                (*current).failed, (*current).online, (*current).faulty, 
+                (*current).oos);
             #endif
         }
         printf("Export Success\n");

@@ -493,8 +493,8 @@ unsigned long long* load_ciphertext(int number_of_blocks) {
 /*******************************************************************************
  * Feistel Network
 *******************************************************************************/
-unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t keys,
-    int encrypt) {
+unsigned long long feistel_network(unsigned long long plaintext, key_cycle_t
+keys, int encrypt) {
     unsigned long s_bits; /* Used to swap r_bits and l_bits */
     unsigned long l_bits = plaintext >> 32;
     unsigned long r_bits = plaintext & EIGHTLOWMASK;
@@ -620,7 +620,8 @@ unsigned long long csprng() {
 *******************************************************************************/
 int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
     int i; /* Iterators */
-    unsigned long long keyArray[NUMBER_OF_KEY_BLOCKS] = {key[0],key[1],key[2],key[3]};
+    unsigned long long keyArray[NUMBER_OF_KEY_BLOCKS] = {key[0],key[1],key[2],
+    key[3]};
     FILE* fp = fopen(KEYNAME, save ? "wb":"rb");
     /* Check we succeed in opening the file */
     if(fp == NULL) { 

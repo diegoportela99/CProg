@@ -17,10 +17,14 @@ void print_section_title(char* string) {
 
 /* Print in debug mode when the primary functions in a section are called.
 E.g., in crypto.c is called when encrypt() and decrypt() are called */
-void print_title(char* string) {
-    printf(TEXTRED(1));
+void print_title(char* string, int argc) {
+    if (argc <= 1) {
+		printf(TEXTRED(0));
+	}
     printf("\n"TITLE"%s"TITLE"\n",string);
-    printf(TEXTDEFAULT);
+    if (argc <= 1) {
+		printf(TEXTDEFAULT);
+	}
 }
 
 /* Call within debug as a header for content within the debug mode.

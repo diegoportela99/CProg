@@ -71,7 +71,7 @@ int start_menu_handler(root_t* root_p, int argc, char* argv[]) {
 					break;
 				} 
 				*(root_p) = *(create_root());
-				load_from_db(root_p);
+				load_from_db(root_p, argc);
 				break;
 			case 3 :
 				do {
@@ -160,7 +160,7 @@ int file_menu_handler(root_t* root_p, int argc) {
 				export_csv(root_p);
 				break;
 			case 3 :
-				save_to_db(root_p);
+				save_to_db(root_p, argc);
 				*(root_p) = *(create_root());
 				break;	
 			case 4 :			

@@ -7,7 +7,7 @@
 #include <stdio.h> /* Used for printf */
 
 /* If defined, activates debug features */
-/*#define DEBUG*/
+/* #define DEBUG */
 
 /* If defined, adds extra debug features
 #define DETAILEDDEBUG */
@@ -27,5 +27,5 @@
 #define TEXTBLUE(x) "\033["#x";34m"
 
 void print_section_title(char* string);
-void print_title(char* string);
+void print_title(char* string, int argc);
 void print_header(char* string);
