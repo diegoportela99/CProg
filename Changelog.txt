@@ -6,3 +6,7 @@
 02/10/2019 - Updated the menus to include headings indicating which menu they are. Seperated the menu functions into a seperate file from the top level. Updated the Makefile.
 04/10/2019 - Created a new c file for the export functions. Developed a first version of the export to csv function.
 04/10/2019 - Updated the export function to use new improvements to the btree. Improved error detection in the menus. Added a debug option in the start menu.
+07/10/2019 - Core functionality assembled, from multiple sources. Running version implimented without cryptography or compression.
+10/10/2019 - Cryptography functions added, significant debugging performed. Now runs effectively bug-less-ly.
+11/10/2019 - Code commenting and style improved, continued testing found a few bugs which were resolved.
+11/10/2019 - Final version assembled and submitted.
