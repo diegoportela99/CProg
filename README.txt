@@ -77,5 +77,5 @@ This simply enables a few lines of code which print information
 when running certain functions.
 
 ******************************************************************
-
+README written by Michael Lardner
 2019
