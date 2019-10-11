@@ -43,5 +43,5 @@ block.o : block.c block.h btree.o debug.o
 	$(CC) $(CCFLAGS) -c -o block.o block.c
 
 clean:
-	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o Compression.o debug.o loadsave.o crypto.o chunk.o block.o database.ssdb key
+	rm SSD.out Main.o Menus.o Import.o Export.o Search.o btree.o Compression.o debug.o loadsave.o crypto.o chunk.o block.o
 	

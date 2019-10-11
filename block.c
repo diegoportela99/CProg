@@ -8,9 +8,9 @@
  * This file contains the functions used to interact with the data block defined
  * in block.h
 *******************************************************************************/
-#include "block.h"
-#include "debug.h"
-#include <stdlib.h>
+#include "block.h" /* For block_t */
+#include "debug.h" /* For DEBUG */
+#include <stdlib.h> /* For malloc */
 
 /******************************************************************************* 
  * This function creates a block, given a pointer to the previous block. It

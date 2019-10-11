@@ -11,6 +11,7 @@
 #include "btree.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*******************************************************************************
  * Main
@@ -89,5 +90,7 @@ int main(int argc, char* argv[]) {
 	/* Calls the binary tree destructor to ensure no trace is left of it once
 	the program is terminated */
 	delete_datastructure(root_p);
+	/* Free the root itself too */
+	free(root_p);
 	return(0);
 }

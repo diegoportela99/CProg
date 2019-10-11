@@ -144,9 +144,7 @@ key_cycle_t* init_key_cycle(unsigned long long key[]) {
         
 
         #ifdef DEBUG
-            printf(TEXTRED(0));
             printf("Initializing key cycle\n");
-            printf(TEXTDEFAULT);
         #endif
 
         (*key_cycle_p).previous_key_cycle_p = NULL;
@@ -233,9 +231,7 @@ void free_key_cycles(key_cycle_t* key_cycle_p) {
     
     #ifdef DEBUG
         int free_n = 0;
-        printf(TEXTRED(0));
         printf("Freeing key cycles\n");
-        printf(TEXTDEFAULT);
     #endif
 
     /* Frees key_cycles while there are more key cycles to free */
@@ -292,9 +288,7 @@ int encrypt(unsigned long long plaintext[], int number_of_blocks) {
     for(i=0; i<number_of_blocks;i++) {
         key_cycle_p = key_schedule(key_cycle_p);
         #ifdef DETAILEDDEBUG
-            printf(TEXTRED(0));
             printf("Scheduling key %d:\n",i);
-            printf(TEXTDEFAULT);
             printf("key_cycle_p = %p\n",key_cycle_p);
         #endif
         (*(ciphertext_p+i)) = feistel_network(plaintext[i],*key_cycle_p,1);
@@ -354,10 +348,8 @@ int decrypt(unsigned long long* plaintext_p) {
     through them */
     for(i=0;i<cipherBlocks; i++) {
         key_cycle_p = key_schedule(key_cycle_p);
-                #ifdef DETAILEDDEBUG
-            printf(TEXTRED(0));
+        #ifdef DETAILEDDEBUG
             printf("Scheduling key %d:\n",i);
-            printf(TEXTDEFAULT);
             printf("key_cycle_p = %p\n",key_cycle_p);
         #endif
     }
@@ -374,9 +366,7 @@ int decrypt(unsigned long long* plaintext_p) {
     }
 
     #ifdef DEBUG
-        printf(TEXTRED(0));
         printf("Returning plaintext:\n");
-        printf(TEXTDEFAULT);
         for(i=0;i<cipherBlocks;i++) {
             printf("%llx\n",*(plaintext_p+i));
         }
@@ -409,9 +399,7 @@ int save_ciphertext(unsigned long long* ciphertext_p, int number_of_blocks) {
     }
 
     #ifdef DEBUG
-        printf(TEXTRED(0));
         printf("Saving ciphertext:\n");
-        printf(TEXTDEFAULT);
     #endif
 
     /* Add a header that is the number of 64 bit blocks in the encrypted file.
@@ -469,9 +457,7 @@ unsigned long long* load_ciphertext(int number_of_blocks) {
     unsigned long long buffer; /* Buffer for fread */
 
     #ifdef DEBUG
-        printf(TEXTRED(0));
         printf("Loading ciphertext:\n");
-        printf(TEXTDEFAULT);
     #endif
 
     FILE* fp = fopen(DBNAME, "rb");
@@ -524,15 +510,8 @@ unsigned long long feistel_network(unsigned long long plaintext,
     #ifdef DEBUG
         /* If we're in either of the more detailed debug modes this should be
         a heading, whereas otherwise it shouldn't. */
-        #if defined DETAILEDDEBUG || defined GRAPHICALDEBUG
-            printf(TEXTRED(0));
-        #endif
         printf("Feistel network running, mode is: %s\n", encrypt ? 
             "ENCRYPT":"DECRYPT");
-        /* Return to default text if we just set to heading mode */
-        #if defined DETAILEDDEBUG || defined GRAPHICALDEBUG
-            printf(TEXTDEFAULT);
-        #endif
     #endif
 
     /* Input whitening. Ternary operator used to select encrypt/decrypt modes */
@@ -687,9 +666,7 @@ int file_handle_key(unsigned long long key[NUMBER_OF_KEY_BLOCKS],int save) {
     }
 
     #ifdef DEBUG
-        printf(TEXTRED(0));
         printf(save?"Saving keys:\n":"Loading keys:\n");
-        printf(TEXTDEFAULT);
     #endif
 
     if(save) {

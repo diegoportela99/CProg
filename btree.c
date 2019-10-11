@@ -1,7 +1,23 @@
+/*******************************************************************************
+ * DATA STRUCTURE HEADER FILE
+ * author: Owen Dowley
+ * student id: 13234505
+ * description: This header file provides our data structure - a binary tree of
+ * telemetry points, and basic methods for interacting with it.
+ * 
+ * TO USE: 
+ * 1) Include in a file: #include "btree.h"
+ * 2) Create root: btree_t* root_p = create_b_tree(NULL); 
+ * (ONLY IN TOP LEVEL, root NEEDS TO BE PASSED DOWN TO FUNCTIONS NEEDING DATA)
+ * 
+ * Think of the "index" as you would an array index, and this as effectively 
+ * just an array that works faster.
+*******************************************************************************/
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> /* For malloc, atoi */
 #include "debug.h"
-#include "btree.h"
+#include "btree.h" /* for btree_t, telemetry_point_t */
 
 /* FUNCTION PROTOTYPES */
 
@@ -10,7 +26,11 @@ void delete_telemetry_point(telemetry_point_t* tp_p);
 /* FUNCTION DEFINITIONS */
 
 /*******************************************************************************
- * Creates root.
+ * Creates the root of the datastructure
+ * inputs:
+ * - none
+ * outputs:
+ * -root_t* | A pointer to the root created
 *******************************************************************************/
 root_t* create_root() {
     root_t* new_root_p = (root_t*)malloc(sizeof(root_t));
@@ -20,7 +40,11 @@ root_t* create_root() {
 }
 
 /*******************************************************************************
- * Creates b_tree.
+ * Creates a btree given a parent
+ * inputs:
+ * - parent | A pointer to the parent to create a btree node off
+ * outputs:
+ * -btree_t* | A pointer to the btree node created
 *******************************************************************************/
 btree_t* create_b_tree(btree_t* parent){
     btree_t* new_b_tree = (btree_t*)malloc(sizeof(btree_t));
@@ -32,7 +56,12 @@ btree_t* create_b_tree(btree_t* parent){
 } 
 
 /*******************************************************************************
- * Creates telemetry point.
+ * Creates a telemetry point given data. Effectively stores one row of the
+ * imported csv
+ * inputs:
+ * - char arrays | Each char array is a single string from an entry in the csv
+ * outputs:
+ * - telemetry_point_t* | A pointer to the telemetry point created
 *******************************************************************************/
 telemetry_point_t* create_telemetry_point(
 	char loc[],char des[],char pla[],char net[],char qua[],char pro[],
@@ -73,24 +102,39 @@ telemetry_point_t* create_telemetry_point(
 return(t_p_p);
 }
 
+/*******************************************************************************
+ * Deletes a telemetry point, freeing all parts of it.
+ * inputs:
+ * - tp_p | A pointer to a telemetry point
+ * outputs:
+ * - none
+*******************************************************************************/
 void delete_telemetry_point(telemetry_point_t* tp_p) {
     if(tp_p!=NULL) {
-        if(tp_p->desig!=NULL) {free(tp_p->desig);}
-        if(tp_p->failed!=NULL) {free(tp_p->failed);}
-        if(tp_p->faulty!=NULL) {free(tp_p->faulty);}
-        if(tp_p->location!=NULL) {free(tp_p->location);}
-        if(tp_p->moduletype!=NULL) {free(tp_p->moduletype);}
-        if(tp_p->network!=NULL) {free(tp_p->network);}
-        if(tp_p->number!=NULL) {free(tp_p->number);}
-        if(tp_p->online!=NULL) {free(tp_p->online);}
-        if(tp_p->oos!=NULL) {free(tp_p->oos);}
-        if(tp_p->plant!=NULL) {free(tp_p->plant);}
-        if(tp_p->protocol!=NULL) {free(tp_p->protocol);}
-        if(tp_p->quantity!=NULL) {free(tp_p->quantity);}
+        free(tp_p->desig);
+        free(tp_p->failed);
+        free(tp_p->faulty);
+        free(tp_p->location);
+        free(tp_p->moduletype);
+        free(tp_p->network);
+        free(tp_p->number);
+        free(tp_p->online);
+        free(tp_p->oos);
+        free(tp_p->plant);
+        free(tp_p->protocol);
+        free(tp_p->quantity);
         free(tp_p);
     }
 }
 
+/*******************************************************************************
+ * Gets the telemetry point at an index in the datastructure.
+ * inputs:
+ * - index | The index to retrieve within the datastructure
+ * - root | A pointer to the root of the datastructure
+ * outputs:
+ * - telemetry_point_t* | A pointer to a located telemetry point
+*******************************************************************************/
 telemetry_point_t* get_telemetry_point(unsigned int index, root_t* root) {
     btree_t* current_node_p = (*root).root;
     #ifdef DETAILEDDEBUG
@@ -103,10 +147,22 @@ telemetry_point_t* get_telemetry_point(unsigned int index, root_t* root) {
     return((*current_node_p).data_p);
 }
 
+/*******************************************************************************
+ * Adds a telemetry point to the datastructure at the requested index.
+ * inputs:
+ * - index | The index to store the telemetry point at
+ * - root | A pointer to the root of the datastructure
+ * - telemetry_point_t* | A pointer to the telemetry point to be stored
+ * outputs:
+ * - none
+*******************************************************************************/
 void add_telemetry_point(unsigned int index, root_t* root, 
     telemetry_point_t* telemetry_point_p) {
-        btree_t* current_node_p = (*root).root;
-        btree_t* next_node_p;
+        btree_t* current_node_p = (*root).root; /* Initially the top node */
+        btree_t* next_node_p; /* The next node to change to */
+
+    /* Iterate through the btree until the current node is the one corresponding
+    to the index provided. */
     while(index) {
         next_node_p = index&1 ? (*current_node_p).r : (*current_node_p).l;
         if (next_node_p == NULL) {
@@ -123,15 +179,31 @@ void add_telemetry_point(unsigned int index, root_t* root,
         index = index >> 1;
     }
     (*root).number_of_entries++;
-    (*current_node_p).data_p = telemetry_point_p;
+
+    /* If the located index has no data points, add one. If not, return an 
+    error message. */
+    if((*current_node_p).data_p == NULL ) {
+        (*current_node_p).data_p = telemetry_point_p;
+    } else {
+        printf("Attempt to overwrite datapoint\n");
+    }
 }
 
+/*******************************************************************************
+ * Deletes the entire datastructure except the root, freeing every item.
+ * inputs:
+ * - root | A pointer to the root of the datastructure
+ * outputs:
+ * - none
+*******************************************************************************/
 void delete_datastructure(root_t* root) {
     printf("Deleting datastructure\n");
-    btree_t* current_node_p = (*root).root;
-    btree_t* next_node_p;
-    int exit = 0;
+    btree_t* current_node_p = (*root).root; /* Initially the top node */
+    btree_t* next_node_p; /* The next node to change to */
+    int exit = 0; /* Set upon reaching the node with no branches left */
+
     while (!exit) {
+        /* If there is a left branch take it */
         if((*current_node_p).l!=NULL) {
             #ifdef DEBUG
                 printf("Branching left\n");
@@ -139,6 +211,7 @@ void delete_datastructure(root_t* root) {
             current_node_p = (*current_node_p).l;
             
         }
+        /* If there are no left branches but are right branches, take them */
         else if((*current_node_p).r!=NULL) {
             #ifdef DEBUG
                 printf("Branching right\n");
@@ -146,16 +219,19 @@ void delete_datastructure(root_t* root) {
             current_node_p = (*current_node_p).r;
             
         }
+        /* If there are no branches, this is a leaf. Remove it. */
         else {
             #ifdef DEBUG
                 printf("Deleting node\n");
             #endif
+            /* If there's a telemetry point to free, free it. */
             if((*current_node_p).data_p!=NULL) {
                 #ifdef DEBUG
                     printf("Deleting telemetry point\n");
                 #endif
                 delete_telemetry_point((*current_node_p).data_p);
             }
+            /* If this is the top node, free it and exit */
             if(current_node_p == (*root).root) {
                 #ifdef DEBUG
                     printf("Freeing root, all branches handled.\n");
@@ -163,6 +239,7 @@ void delete_datastructure(root_t* root) {
                 free(current_node_p);
                 exit = 1;
             }
+            /* If this isn't the top node, free it and move up */
             if(!exit) {
                 next_node_p = (*current_node_p).p;
                 if((*(*current_node_p).p).r == current_node_p) {
@@ -177,14 +254,6 @@ void delete_datastructure(root_t* root) {
                 #endif
                 current_node_p = next_node_p;
             }
-            
         }
     }
 }
-
-/*int main(void) {
-    root_t* root_p = create_root();
-    telemetry_point_t* tel_point_p = create_telemetry_point("loc","des","pla",
-        "net","qua","pro","num","add","mod","fai","onl","fau","oos"
-        );
-}*/

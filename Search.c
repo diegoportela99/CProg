@@ -2,8 +2,9 @@
 * Search functions
 * Developer: Owen Dowley, Michael Lardner
 * Student ID: 13234505, 12893602
-* Description: This file contains for searching the btree memory structure.
-* Functions required in top level from this file are prototyped in Substation.h
+* Description: This file contains functions for searching the btree memory 
+* structure. Functions required in top level from this file are prototyped in 
+* Substation.h
 *******************************************************************************/
 
 #include "btree.h"
@@ -70,8 +71,14 @@ void print_telemetry_point(telemetry_point_t* telemetry_point) {
     );
 }
 
+/******************************************************************************* 
+ * This function prints a header for search results
+ * - argc | Passed from main, used to work out if we could be in colour mode
+ * outputs:
+ * - none
+*******************************************************************************/
 void print_search_header(int argc) {
-    /* Checks if the user is in a colour mode */
+    /* Checks if the user is in colour mode */
     if (argc <= 1) {
         printf(TEXTRED(0));
     }
@@ -85,7 +92,16 @@ void print_search_header(int argc) {
        printf(TEXTDEFAULT); 
     }
 }
-
+/******************************************************************************* 
+ * This function prints a header for search results
+ * - root | A pointer to the root of the datastructure
+ * - search_criteria | What search-mode we're in and so what field we should
+ *                   | search by.
+ * - search_string | The string to search for
+ * - argc | Passed from main, used to work out if we could be in colour mode
+ * outputs:
+ * - none
+*******************************************************************************/
 void search_btree(root_t* root, int search_criteria, char search_string[],
 int argc) {
     int i,j=0; /* Iterators */

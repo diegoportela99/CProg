@@ -44,6 +44,8 @@ int colour_menu_handler(void);
 void import_menu(int argc, char* argv[]);
 /* Handles user input for the import menu */
 int import_menu_handler(root_t* root_p, char* argv[]);
+/* Handles user input for loading the database */
+void load_database_file_menu(root_t* root_p, int argc);
 /* Imports the data from csv and writes to database */
 void import_csv(root_t* root_p, int argc, char* argv[]);
 /* Loads the data from csv */

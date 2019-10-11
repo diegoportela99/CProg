@@ -5,15 +5,14 @@
  * Student ID: 13234505
  * 
  * Description:
- * This file defines the datatype block.h. It is used to transfer from the 
+ * This file defines the datatype block. It is used to transfer from the 
  * btree datastructure to unsigned long long ints which can be handled by
  * encryption and decryption.
 *******************************************************************************/
 #ifndef BLOCKHEADER
 #define BLOCKHEADER
 
-#include "debug.h"
-#include "btree.h"
+#include "debug.h" /* for DEBUG */
 
 struct block {
     /* The number of data blocks currently stored */

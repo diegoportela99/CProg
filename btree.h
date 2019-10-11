@@ -2,23 +2,13 @@
  * DATA STRUCTURE HEADER FILE
  * author: Owen Dowley
  * student id: 13234505
- * description: This header file provides our data structure - a binary tree of
- * telemetry points, and basic methods for interacting with it.
- * 
- * TO USE: 
- * 1) Include in a file: #include "btree.h"
- * 2) Create root: btree_t* root_p = create_b_tree(NULL); 
- * (ONLY IN TOP LEVEL, root NEEDS TO BE PASSED DOWN TO FUNCTIONS NEEDING DATA)
- * 
- * Think of the "index" as you would an array index, and this as effectively 
- * just an array that works faster.
+ * description: This header file provides our datastructure - a binary tree of
+ * telemetry points - and prototypes functions for interacting with it.
+ * Those functions are defined in btree.c
 *******************************************************************************/
 
 #ifndef DATASTRUCTUREHEADER
 #define DATASTRUCTUREHEADER
-
-#include <stdlib.h>
-#include <stdio.h>
 
 struct telemetry_point {
 	/*the location of the substation*/

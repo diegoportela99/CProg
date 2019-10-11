@@ -12,6 +12,7 @@
 #include "debug.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> /* for atoi */
 
 /*******************************************************************************
  * This function handles the importing of csv files into the database

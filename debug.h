@@ -9,10 +9,10 @@
 /* If defined, activates debug features */
 /*#define DEBUG*/
 
-/* If defined, adds extra debug features
+/* If defined, adds extra debug features*/
 /*#define DETAILEDDEBUG */
 
-/* If defined adds visualizations of Wolfram's Rule 30 in cryptography
+/* If defined adds visualizations of Wolfram's Rule 30 in cryptography */
 /*#define GRAPHICALDEBUG */
 
 /* This debug mode helps make memory issues visible by removing the random
@@ -26,9 +26,5 @@ name. Do not leave this running. */
 /* This string is printed to set terminal text to red. x is a boolean: 1 means 
    bold, 0 means normal. */
 #define TEXTRED(x) "\033["#x";31m"
-
-/* This string is printed to set terminal text to blue. x is a boolean: 1 means 
-   bold, 0 means normal. */
-#define TEXTBLUE(x) "\033["#x";34m"
 
 void print_title(char* string, int argc);

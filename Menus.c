@@ -66,12 +66,7 @@ int start_menu_handler(root_t* root_p, int argc, char* argv[]) {
 				import_csv(root_p, argc, argv);
 				break;
 			case 2 :
-				if(root_p->number_of_entries>0) {
-					printf("Error: Data already present.\n");
-					break;
-				} 
-				*(root_p) = *(create_root());
-				load_from_db(root_p, argc);
+				load_database_file_menu(root_p,argc);
 				break;
 			case 3 :
 				do {
@@ -358,4 +353,48 @@ int colour_menu_handler(void) {
 		printf("Invalid choice\n");
 	}
 	return selection;
+}
+
+/*******************************************************************************
+ * This function handles what to do when the user attempts to load a database
+ * file.
+ * Developer: Owen Dowley
+ * inputs:
+ * - root_p | The root of the binary tree structure
+ * - argc | Whether the program was run with arguments
+ * outputs:
+ * - none
+*******************************************************************************/
+void load_database_file_menu(root_t* root_p, int argc) {
+	int selection;
+	char input[MAX_STRING_LEN];
+	if(root_p->number_of_entries>0) {
+		if (argc <= 1) {
+			printf("\n"
+			"\033[1;31m"
+			"ERROR: Data already present\n"
+			"\033[0m");
+		} else {
+			printf("ERROR: Data already present\n");
+		} 
+		printf("Erase current data and continue?\n"
+			"1. Continue\n"
+			"Any other key to cancel\n"
+			"Enter choice>\n");
+		fgets(input, MAX_STRING_LEN, stdin);
+		selection = atoi(input);
+		switch(selection) {
+			case 1:
+				delete_datastructure(root_p);
+				*(root_p) = *(create_root());
+				load_from_db(root_p, argc);
+				break;
+			default:
+				break;
+		}
+	} else {
+		*(root_p) = *(create_root());
+		load_from_db(root_p, argc);
+	}
+	return;
 }

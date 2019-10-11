@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * DEBUG.C
+ * Name: Owen Dowley
+ * Student ID: 13234505
+ * Description: This file contains implimentation of the function prototyped in
+ * debug.h.
+*******************************************************************************/
+
 #include <stdio.h>
 #include "debug.h"
 
@@ -8,7 +16,7 @@
 #define SECTIONTITLE "<><><><><>"
 
 /* Print in debug mode when the primary functions in a section are called.
-E.g., in crypto.c is called when encrypt() and decrypt() are called */
+E.g., when encrypt() and decrypt() are called */
 void print_title(char* string, int argc) {
     if (argc <= 1) {
 		printf(TEXTRED(1));
